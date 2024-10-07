@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Conversor de Criptos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-item>
+    <ion-label position="floating">Cantidad</ion-label>
+    <ion-input [(ngModel)]="amount" type="number"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>De</ion-label>
+    <ion-select [(ngModel)]="fromCurrency">
+      <ion-select-option value="BTC">Bitcoin (BTC)</ion-select-option>
+      <ion-select-option value="ETH">Ethereum (ETH)</ion-select-option>
+      <ion-select-option value="USD">Dólar (USD)</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>A</ion-label>
+    <ion-select [(ngModel)]="toCurrency">
+      <ion-select-option value="USD">Dólar (USD)</ion-select-option>
+      <ion-select-option value="BTC">Bitcoin (BTC)</ion-select-option>
+      <ion-select-option value="ETH">Ethereum (ETH)</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-button expand="full" (click)="convertCurrency()">Convertir</ion-button>
+
+  <ion-card *ngIf="conversionResult">
+    <ion-card-header>
+      <ion-card-title>Resultado: {{ conversionResult }}</ion-card-title>
+    </ion-card-header>
+  </ion-card>
+</ion-content>

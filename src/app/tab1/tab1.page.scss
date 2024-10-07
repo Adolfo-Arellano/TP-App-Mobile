@@ -1,0 +1,98 @@
+.login-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  .tabs {
+    display: flex;
+    margin-bottom: 20px;
+
+    button {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      color: #fff;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-size: 16px;
+
+      &.active {
+        border-bottom: 2px solid #ffd000;
+      }
+    }
+  }
+
+  ion-item {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    --background: rgba(255, 255, 255, 0.1);
+  }
+
+  ion-button {
+    max-width: 400px;
+    margin-top: 20px;
+  }
+
+  .forgot-password {
+    margin-top: 15px;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+  }
+}
+
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../../../assets/img/crypto-background.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+  z-index: -1;
+  filter: brightness(0.7);
+}
+
+.login-box {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  width: 320px;
+  max-width: 90%;
+}
+
+#keep-sign {
+  // --ion-item-background: transparent;
+  --background: rgba(0, 0, 0, 0.1);
+  --ripple-color: transparent;
+  --checkmark-color: #ffd000;
+}
+
+#keep-sign ion-checkbox {
+  --checkbox-background-checked: #ffd000; /* Fondo del checkbox seleccionado */
+  --border-color-checked: #ffd000;
+  --border-color: #fff; /* Color del borde sin seleccionar */
+  --checkmark-color: #fff;
+}
+
+#btn-sign-in {
+  --background: #ffd000;
+  font-weight: bold;
+}
+
+#btn-sign-up {
+  --background: #ffd000;
+  font-weight: bold;
+}

@@ -1,0 +1,16 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Criptomonedas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let crypto of cryptos">
+      <ion-label>
+        <h2>{{ crypto.name }}</h2>
+        <p>{{ crypto.id }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
