@@ -9,18 +9,18 @@ import { Router } from '@angular/router'; // Para redirigir a otras pestañas
 })
 export class LoginPage {
   // Variables para controlar el estado de la página y los inputs del usuario
-  isSignIn: boolean = true;  // Controla qué formulario se muestra (true para Sign In, false para Sign Up)
-  email: string = '';        // Almacena el email ingresado en el formulario de registro
-  password: string = '';     // Almacena la contraseña para el inicio de sesión
-  password2: string = '';    // Almacena la contraseña para el registro
-  username: string = '';     // Almacena el nombre de usuario para el inicio de sesión
-  username2: string = '';    // Almacena el nombre de usuario para el registro
+  isSignIn: boolean = true; // Controla qué formulario se muestra (true para Sign In, false para Sign Up)
+  email: string = ''; // Almacena el email ingresado en el formulario de registro
+  password: string = ''; // Almacena la contraseña para el inicio de sesión
+  password2: string = ''; // Almacena la contraseña para el registro
+  username: string = ''; // Almacena el nombre de usuario para el inicio de sesión
+  username2: string = ''; // Almacena el nombre de usuario para el registro
   repeatPassword: string = ''; // Almacena la confirmación de contraseña para el registro
 
-  constructor (
-    private alertController: AlertController,  // Para mostrar alertas
-    private toastController: ToastController,  // Para mostrar notificaciones breves
-    private router: Router  // Para la navegación entre páginas
+  constructor(
+    private alertController: AlertController, // Para mostrar alertas
+    private toastController: ToastController, // Para mostrar notificaciones breves
+    private router: Router // Para la navegación entre páginas
   ) {}
 
   // isSignIn: Controla qué formulario se muestra
@@ -40,7 +40,7 @@ export class LoginPage {
     const alert = await this.alertController.create({
       header: header,
       message: message,
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   }
@@ -50,7 +50,7 @@ export class LoginPage {
     const toast = await this.toastController.create({
       message: message,
       duration: 2000,
-      position: 'top'
+      position: 'top',
     });
     toast.present();
   }
@@ -58,24 +58,30 @@ export class LoginPage {
   // Lógica para el inicio de sesión
   async onSignIn() {
     // Busca el usuario en localStorage o sessionStorage
-    const savedUser = JSON.parse(localStorage.getItem(this.username) || sessionStorage.getItem(this.username) || 'null');
+    const savedUser = JSON.parse(
+      localStorage.getItem(this.username) ||
+        sessionStorage.getItem(this.username) ||
+        'null'
+    );
     if (savedUser && savedUser.password === this.password) {
       console.log('Login successful');
 
       // Mostrar toast de éxito
       await this.presentToast(`Bienvenido ${this.username}`);
 
-      // Redirige a la tab de criptomonedas, o la que queramos
+      // Redirige a la tab de currency, o la que queramos
       this.router.navigateByUrl('/tabs/tab2');
     } else {
-      console.log('Invalid credentials');
-      
+      console.log('Credenciales invalidas');
+
       // Mostrar alerta de error
       await this.presentAlert('Error', 'Credenciales incorrectas');
     }
-    console.log('Sign In', { username: this.username, password: this.password });
+    console.log('Sign In', {
+      username: this.username,
+      password: this.password,
+    });
   }
-
 
   // Lógica para registrar un usuario
   async onSignUp() {
@@ -89,11 +95,11 @@ export class LoginPage {
     const newUser = {
       username: this.username2,
       email: this.email,
-      password: this.password2
+      password: this.password2,
     };
 
     // Guarda los datos en localStorage o sessionStorage
-    const saveInLocalStorage = true;  // Se Puede cambiar el valor a false para usar sessionStorage
+    const saveInLocalStorage = true; // Se Puede cambiar el valor a false para usar sessionStorage
     if (saveInLocalStorage) {
       // Guarda el nuevo usuario en localStorage
       localStorage.setItem(this.username2, JSON.stringify(newUser));
@@ -111,13 +117,17 @@ export class LoginPage {
           text: 'Sign In',
           handler: () => {
             this.toggleSignIn(); // Cambia al formulario de inicio de sesión tras el registro exitoso
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
 
-    console.log('Sign Up', { username: this.username2, email: this.email, password: this.password2 });
+    console.log('Sign Up', {
+      username: this.username2,
+      email: this.email,
+      password: this.password2,
+    });
   }
 
   // Método para navegar a la página de recuperación de contraseña
