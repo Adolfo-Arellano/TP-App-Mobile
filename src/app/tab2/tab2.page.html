@@ -1,16 +1,43 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Criptomonedas</ion-title>
+    <ion-title>Monedas</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-item *ngFor="let crypto of cryptos">
-      <ion-label>
-        <h2>{{ crypto.name }}</h2>
-        <p>{{ crypto.id }}</p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
+  <div class="contenedor2">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Cryptos</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-searchbar
+      (ionInput)="buscadorCrypto($event)"
+      placeholder="buscar crypto..."
+    ></ion-searchbar>
+    <ion-list>
+      <ion-item *ngFor="let crypto of cryptos">
+        <ion-label>
+          <div class="contenedorItem">
+            <div>
+              <h2>{{ crypto.name }}</h2>
+              <p>{{ crypto.code }}</p>
+              <!-- Botón para agregar o quitar de favoritos -->
+              <ion-button
+                fill="clear"
+                (click)="SeleccionarFavoritosCrypto(crypto)"
+              >
+                <ion-icon
+                  [name]="crypto.esFavorito ? 'star' : 'star-outline'"
+                ></ion-icon>
+              </ion-button>
+            </div>
+            <ion-button class="btnVer" (click)="abrirDetallesCrypto(crypto)">
+              Ver
+            </ion-button>
+          </div>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
 </ion-content>

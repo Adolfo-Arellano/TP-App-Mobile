@@ -1,0 +1,49 @@
+ion-toolbar {
+  --background: #ffd000;
+  font-weight: bold;
+  color: black;
+}
+ion-content {
+  --background: #ffd000;
+  font-weight: bold;
+  color: black;
+}
+
+ion-searchbar {
+  --background: rgb(20, 20, 20);
+  font-weight: bold;
+  color: white;
+}
+
+ion-item {
+  --background: rgb(20, 20, 20);
+  font-weight: bold;
+  color: white;
+}
+
+.contenedorItem {
+  display: flex;
+  justify-content: space-between;
+}
+
+.btnVer {
+  --background: #ffd000;
+  font-weight: bold;
+  color: rgb(20, 20, 20);
+  font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  height: 1rem;
+  width: 3rem;
+}
+
+ion-button {
+  --background: rgb(20, 20, 20);
+  ion-icon {
+    font-weight: bold;
+    color: #ffd000;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+  }
+}
