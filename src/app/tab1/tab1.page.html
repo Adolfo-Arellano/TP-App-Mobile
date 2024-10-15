@@ -1,51 +1,39 @@
-<ion-content >
+<ion-content class="ion-padding">
   <div class="login-container">
     <div class="login-box">
       <div class="tabs">
-        <button [ngClass]="{ active: isSignIn }" (click)="toggleSignIn()">Sign In</button>
-        <button [ngClass]="{ active: !isSignIn }" (click)="toggleSignUp()">Sign Up</button>
+        <button [ngClass]="{ active: isSignIn }" (click)="toggleSignIn()">Ingresar</button>
+        <button [ngClass]="{ active: !isSignIn }" (click)="toggleSignUp()">Registrarse</button>
       </div>
 
-      <div *ngIf="isSignIn; else signUpForm">
-        <form (submit)="onSignIn()">
-          <ion-item>
-            <ion-label position="stacked">Username</ion-label>
-            <ion-input [(ngModel)]="username" name="username" type="username" placeholder="Username" required></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Password</ion-label>
-            <ion-input [(ngModel)]="password" name="password" type="password" placeholder="**********" required></ion-input>
-          </ion-item>
-          <ion-item id="keep-sign" lines="none">
-            <ion-checkbox slot="start"></ion-checkbox>
-            <ion-label>Keep me Signed in</ion-label>
-          </ion-item>
-          <ion-button id="btn-sign-in" expand="block" type="submit">Sign In</ion-button>
-          <a class="forgot-password" (click)="goToForgotPassword()">Forgot Password?</a>
-        </form>
-      </div>
+      <form *ngIf="isSignIn">
+        <ion-item>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input type="email" [(ngModel)]="email" name="email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Contraseña</ion-label>
+          <ion-input type="password" [(ngModel)]="password" name="password"></ion-input>
+        </ion-item>
+        <ion-button expand="block" (click)="onSignIn()">Ingresar</ion-button>
+        <p class="forgot-password" (click)="goToForgotPassword()">¿Olvidaste tu contraseña?</p>
+      </form>
 
-      <ng-template #signUpForm>
-        <form (submit)="onSignUp()">
-          <ion-item>
-            <ion-label position="stacked">Username</ion-label>
-            <ion-input [(ngModel)]="username2" name="username" placeholder="Username" required></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Email</ion-label>
-            <ion-input [(ngModel)]="email" name="email" type="email" placeholder="example@gmail.com" required></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Password</ion-label>
-            <ion-input [(ngModel)]="password2" name="password" type="password" placeholder="**********" required></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Repeat Password</ion-label>
-            <ion-input [(ngModel)]="repeatPassword" name="repeatPassword" type="password" placeholder="**********" required></ion-input>
-          </ion-item>
-          <ion-button id="btn-sign-up" expand="block" type="submit">Sign Up</ion-button>
-        </form>
-      </ng-template>
+      <form *ngIf="!isSignIn">
+        <ion-item>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input type="email" [(ngModel)]="email" name="email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Contraseña</ion-label>
+          <ion-input type="password" [(ngModel)]="password2" name="password"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Repetir Contraseña</ion-label>
+          <ion-input type="password" [(ngModel)]="repeatPassword" name="repeatPassword"></ion-input>
+        </ion-item>
+        <ion-button expand="block" (click)="onSignUp()">Registrarse</ion-button>
+      </form>
     </div>
   </div>
 </ion-content>

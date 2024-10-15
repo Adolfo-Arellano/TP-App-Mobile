@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { AlertController, ToastController } from '@ionic/angular'; // Importar alertas y toasts
-import { Router } from '@angular/router'; // Para redirigir a otras pestañas
+import { AlertController, ToastController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 @Component({
   selector: 'app-login',
@@ -8,34 +9,29 @@ import { Router } from '@angular/router'; // Para redirigir a otras pestañas
   styleUrls: ['./tab1.page.scss'],
 })
 export class LoginPage {
-  // Variables para controlar el estado de la página y los inputs del usuario
-  isSignIn: boolean = true;  // Controla qué formulario se muestra (true para Sign In, false para Sign Up)
-  email: string = '';        // Almacena el email ingresado en el formulario de registro
-  password: string = '';     // Almacena la contraseña para el inicio de sesión
-  password2: string = '';    // Almacena la contraseña para el registro
-  username: string = '';     // Almacena el nombre de usuario para el inicio de sesión
-  username2: string = '';    // Almacena el nombre de usuario para el registro
-  repeatPassword: string = ''; // Almacena la confirmación de contraseña para el registro
+  isSignIn: boolean = true;
+  email: string = '';
+  password: string = '';
+  password2: string = '';
+  username: string = '';
+  username2: string = '';
+  repeatPassword: string = '';
 
-  constructor (
-    private alertController: AlertController,  // Para mostrar alertas
-    private toastController: ToastController,  // Para mostrar notificaciones breves
-    private router: Router  // Para la navegación entre páginas
+  constructor(
+    private alertController: AlertController,
+    private toastController: ToastController,
+    private router: Router,
+    private afAuth: AngularFireAuth
   ) {}
 
-  // isSignIn: Controla qué formulario se muestra
-
-  // Cambia al formulario de inicio de sesión
   toggleSignIn() {
     this.isSignIn = true;
   }
 
-  // Cambia al formulario de registro
   toggleSignUp() {
     this.isSignIn = false;
   }
 
-  // Método para mostrar alertas
   async presentAlert(header: string, message: string) {
     const alert = await this.alertController.create({
       header: header,
@@ -45,7 +41,6 @@ export class LoginPage {
     await alert.present();
   }
 
-  // Método para mostrar toasts (notificaciones breves)
   async presentToast(message: string) {
     const toast = await this.toastController.create({
       message: message,
@@ -55,74 +50,80 @@ export class LoginPage {
     toast.present();
   }
 
-  // Lógica para el inicio de sesión
   async onSignIn() {
-    // Busca el usuario en localStorage o sessionStorage
-    const savedUser = JSON.parse(localStorage.getItem(this.username) || sessionStorage.getItem(this.username) || 'null');
-    if (savedUser && savedUser.password === this.password) {
+    try {
+      const result = await this.afAuth.signInWithEmailAndPassword(this.email, this.password);
       console.log('Login successful');
-
-      // Mostrar toast de éxito
-      await this.presentToast(`Bienvenido ${this.username}`);
-
-      // Redirige a la tab de criptomonedas, o la que queramos
+      if (result.user) {
+        await this.presentToast(`Bienvenido ${result.user.email}`);
+      } else {
+        await this.presentToast('Bienvenido');
+      }
       this.router.navigateByUrl('/tabs/tab2');
-    } else {
-      console.log('Invalid credentials');
-      
-      // Mostrar alerta de error
-      await this.presentAlert('Error', 'Credenciales incorrectas');
+    } catch (error: any) {
+      console.error('Login error', error);
+      let errorMessage = 'Ocurrió un error durante el inicio de sesión';
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage = 'No existe una cuenta con este correo electrónico';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = 'Contraseña incorrecta';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'El correo electrónico no es válido';
+          break;
+      }
+      await this.presentAlert('Error', errorMessage);
     }
-    console.log('Sign In', { username: this.username, password: this.password });
   }
 
-
-  // Lógica para registrar un usuario
   async onSignUp() {
-    // Verifica que las contraseñas coincidan
+    if (this.password2.length < 6) {
+      await this.presentAlert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+  
     if (this.password2 !== this.repeatPassword) {
-      console.log('Passwords do not match');
       await this.presentAlert('Error', 'Las contraseñas no coinciden');
       return;
     }
-    // Crea un objeto con los datos del nuevo usuario
-    const newUser = {
-      username: this.username2,
-      email: this.email,
-      password: this.password2
-    };
-
-    // Guarda los datos en localStorage o sessionStorage
-    const saveInLocalStorage = true;  // Se Puede cambiar el valor a false para usar sessionStorage
-    if (saveInLocalStorage) {
-      // Guarda el nuevo usuario en localStorage
-      localStorage.setItem(this.username2, JSON.stringify(newUser));
-    } else {
-      sessionStorage.setItem(this.username2, JSON.stringify(newUser));
+  
+    try {
+      const result = await this.afAuth.createUserWithEmailAndPassword(this.email, this.password2);
+      console.log('Sign Up successful');
+      await this.presentAlert('Registro Exitoso', 'Se ha registrado correctamente');
+      this.toggleSignIn();
+    } catch (error: any) {
+      console.error('Sign Up error', error);
+      let errorMessage = 'No se pudo completar el registro';
+      
+      switch(error.code) {
+        case 'auth/weak-password':
+          errorMessage = 'La contraseña debe tener al menos 6 caracteres';
+          break;
+        case 'auth/email-already-in-use':
+          errorMessage = 'Este correo electrónico ya está en uso';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'El correo electrónico no es válido';
+          break;
+      }
+      await this.presentAlert('Error', errorMessage);
     }
-    console.log('Sign Up successful');
-
-    // Muestra alerta de registro exitoso
-    const alert = await this.alertController.create({
-      header: 'Registro Exitoso',
-      message: 'Se ha registrado correctamente',
-      buttons: [
-        {
-          text: 'Sign In',
-          handler: () => {
-            this.toggleSignIn(); // Cambia al formulario de inicio de sesión tras el registro exitoso
-          }
-        }
-      ]
-    });
-    await alert.present();
-
-    console.log('Sign Up', { username: this.username2, email: this.email, password: this.password2 });
   }
 
-  // Método para navegar a la página de recuperación de contraseña
   goToForgotPassword() {
-    console.log('Forgot Password');
-    this.router.navigateByUrl('/tabs/forgot-password');
+    if (!this.email) {
+      this.presentAlert('Error', 'Por favor, ingrese su correo electrónico');
+      return;
+    }
+    this.afAuth.sendPasswordResetEmail(this.email)
+    .then(() => {
+      this.presentAlert('Éxito', 'Se ha enviado un correo para restablecer su contraseña');
+    })
+    .catch((error) => {
+      this.presentAlert('Error', 'No se pudo enviar el correo de restablecimiento');
+    });
   }
 }
