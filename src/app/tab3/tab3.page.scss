@@ -1,0 +1,69 @@
+/* Fondo negro para todo el contenido */
+ion-content {
+    --background: #342e2e; /* Fondo negro */
+    color: white; /* Texto blanco */
+  }
+  
+  /* Encabezado y barra de iconos negros */
+  ion-header,
+  ion-toolbar {
+    --background: #312f2f; /* Fondo negro */
+    color: white; /* Texto blanco */
+  }
+  
+  /* Títulos y etiquetas con texto blanco */
+  ion-title,
+  ion-label,
+  ion-card-title,
+  ion-card-content {
+    color: white;
+  }
+  
+  /* Botones amarillos con texto blanco y fuente más grande */
+ion-button {
+    --background: #ffcc00; /* Fondo amarillo */
+    color: #ffffff; /* Texto blanco */
+    
+    font-size: 18px; /* Aumentar el tamaño de la letra */
+    font-weight: bold; /* Hacer el texto más grueso */
+    padding: 12px; /* Aumentar el relleno para hacerlo más grande */
+    border-radius: 8px; /* Bordes redondeados */
+    
+    /* Agregar sombra al botón para mejorar la visibilidad */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    
+    /* Asegurarse de que el botón tenga un efecto de clic */
+    transition: background-color 0.3s ease;
+    
+    &:hover {
+      --background: #dcba32; /* Cambia ligeramente el color al pasar el mouse */
+    }
+  }
+  
+  
+  /* Estilo de los ítems (texto blanco en inputs y selects) */
+  ion-item {
+    --background: transparent;
+    color: white;
+  }
+  
+  /* Cambiar color de las opciones del ion-select */
+  ion-select-option {
+    color: rgb(69, 65, 65); /* Texto negro en las opciones */
+  }
+  
+  /* Estilo para el resultado de la conversión */
+  ion-card {
+    --background: #211e1e; /* Fondo gris oscuro para el resultado */
+    color: white; /* Texto blanco */
+  }
+  
+  ion-card-header {
+    --background: #252323;
+    color: white;
+  }
+  
+  ion-card-content {
+    --background: #1a1a1a;
+    color: white;
+  }
