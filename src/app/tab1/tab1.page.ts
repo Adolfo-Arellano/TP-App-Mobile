@@ -36,7 +36,7 @@ export class LoginPage {
     const alert = await this.alertController.create({
       header: header,
       message: message,
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   }
@@ -45,7 +45,7 @@ export class LoginPage {
     const toast = await this.toastController.create({
       message: message,
       duration: 2000,
-      position: 'top'
+      position: 'top',
     });
     toast.present();
   }
@@ -77,7 +77,7 @@ export class LoginPage {
       await this.presentAlert('Error', errorMessage);
     }
   }
-
+  
   async onSignUp() {
     if (this.password2.length < 6) {
       await this.presentAlert('Error', 'La contraseña debe tener al menos 6 caracteres');
