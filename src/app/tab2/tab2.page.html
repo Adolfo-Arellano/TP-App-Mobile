@@ -1,8 +1,37 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Monedas</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content>
+  <div class="contenedor1">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Monedas</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-searchbar
+      (ionInput)="buscador($event)"
+      placeholder="buscar moneda..."
+    ></ion-searchbar>
+    <ion-list>
+      <ion-item *ngFor="let moneda of monedas">
+        <ion-label>
+          <div class="contenedorItem">
+            <div>
+              <h2>{{ moneda.name }}</h2>
+              <p>{{ moneda.id }}</p>
+              <!-- Botón para agregar o quitar de favoritos -->
+              <ion-button fill="clear" (click)="SeleccionarFavorito(moneda)">
+                <ion-icon
+                  [name]="moneda.esFavorito ? 'star' : 'star-outline'"
+                ></ion-icon>
+              </ion-button>
+            </div>
+            <ion-button class="btnVer" (click)="abrirDetalles(moneda)">
+              Ver
+            </ion-button>
+          </div>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>
 
 <ion-content>
   <div class="contenedor2">
