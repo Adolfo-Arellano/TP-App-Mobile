@@ -1,17 +1,43 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Detalles del Artículo</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
-  <ion-card *ngIf="itemDetalles">
-    <ion-card-header>
-      <ion-card-title>{{ itemDetalles.id }}</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p>{{ itemDetalles.name }}</p>
-      <!-- Otros detalles del artículo -->
-    </ion-card-content>
-  </ion-card>
+  <ion-toolbar>
+    <ion-title>
+      {{ itemDetalles.id ? 'Información de Moneda' : 'Información de Crypto' }}
+    </ion-title>
+  </ion-toolbar>
+  <div
+    class="detalles-container"
+    [ngClass]="{'detalles-container-crypto': tipo === 'crypto', 'detalles-container-moneda': tipo === 'moneda'}"
+  >
+    <ion-card *ngIf="itemDetalles">
+      <ion-card-header>
+        <ion-card-title
+          >{{ itemDetalles.id || itemDetalles.code }}</ion-card-title
+        >
+      </ion-card-header>
+      <ion-card-content>
+        <div><h2>{{ itemDetalles.name }}</h2></div>
+        <div><p class="compra">Compra: ${{ precioCompra }} USD</p></div>
+        <div><p class="venta">Venta: ${{ precioVenta }} USD</p></div>
+        <div><p class="spot">Spot: ${{ precioSpot }} USD</p></div>
+        <div class="grafico">
+          <img
+            src="/assets/stockmarket.jpg"
+            alt="Grafico con su valor actual"
+          />
+          <p class="spot">{{ precioSpot }}</p>
+        </div>
+
+        <!-- Botón para agregar o quitar de favoritos -->
+        <ion-button class="fav" (click)="toggleFavorito()">
+          <ion-icon
+            class="favIcono"
+            [name]="itemDetalles.esFavorito ? 'star' : 'star-outline'"
+          ></ion-icon>
+          {{ itemDetalles.esFavorito ? 'Quitar de Favoritos' : 'Agregar a
+          Favoritos' }}
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+    <ion-button class="volverBtn" (click)="volver()">Volver</ion-button>
+  </div>
 </ion-content>

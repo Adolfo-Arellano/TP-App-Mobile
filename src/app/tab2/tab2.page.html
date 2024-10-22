@@ -1,14 +1,25 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Seleccionar Tipo</ion-title>
+    <ion-segment [(ngModel)]="sliderTipo">
+      <ion-segment-button value="monedas">
+        <ion-label>Monedas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="cryptos">
+        <ion-label>Criptos</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content>
-  <div class="contenedor1">
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Monedas</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-searchbar
-      (ionInput)="buscador($event)"
-      placeholder="buscar moneda..."
-    ></ion-searchbar>
+  <ion-searchbar
+    (ionInput)="sliderTipo === 'monedas' ? buscador($event) : buscadorCrypto($event)"
+    placeholder="Buscar {{ sliderTipo === 'monedas' ? 'moneda' : 'crypto' }}..."
+    class="buscador-fijo"
+  ></ion-searchbar>
+  <!-- Mostrar monedas cuando el valor del slider es 'monedas' -->
+  <div *ngIf="sliderTipo === 'monedas'">
     <ion-list>
       <ion-item *ngFor="let moneda of monedas">
         <ion-label>
@@ -16,34 +27,25 @@
             <div>
               <h2>{{ moneda.name }}</h2>
               <p>{{ moneda.id }}</p>
-              <!-- Botón para agregar o quitar de favoritos -->
+            </div>
+            <div class="botones">
+              <ion-button class="btnVer" (click)="abrirDetalles(moneda)">
+                Ver
+              </ion-button>
               <ion-button fill="clear" (click)="SeleccionarFavorito(moneda)">
                 <ion-icon
                   [name]="moneda.esFavorito ? 'star' : 'star-outline'"
                 ></ion-icon>
               </ion-button>
             </div>
-            <ion-button class="btnVer" (click)="abrirDetalles(moneda)">
-              Ver
-            </ion-button>
           </div>
         </ion-label>
       </ion-item>
     </ion-list>
   </div>
-</ion-content>
 
-<ion-content>
-  <div class="contenedor2">
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Cryptos</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-searchbar
-      (ionInput)="buscadorCrypto($event)"
-      placeholder="buscar crypto..."
-    ></ion-searchbar>
+  <!-- Mostrar criptos cuando el valor del slider es 'cryptos' -->
+  <div *ngIf="sliderTipo === 'cryptos'">
     <ion-list>
       <ion-item *ngFor="let crypto of cryptos">
         <ion-label>
@@ -51,7 +53,12 @@
             <div>
               <h2>{{ crypto.name }}</h2>
               <p>{{ crypto.code }}</p>
-              <!-- Botón para agregar o quitar de favoritos -->
+              <!-- Cambia moneda.id a crypto.code -->
+            </div>
+            <div class="botones">
+              <ion-button class="btnVer" (click)="abrirDetallesCrypto(crypto)">
+                Ver
+              </ion-button>
               <ion-button
                 fill="clear"
                 (click)="SeleccionarFavoritosCrypto(crypto)"
@@ -61,9 +68,6 @@
                 ></ion-icon>
               </ion-button>
             </div>
-            <ion-button class="btnVer" (click)="abrirDetallesCrypto(crypto)">
-              Ver
-            </ion-button>
           </div>
         </ion-label>
       </ion-item>

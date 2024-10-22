@@ -1,16 +1,28 @@
 ion-toolbar {
-  --background: #ffd000;
+  --ripple-color: transparent;
+  --background: rgba(0, 0, 0, 0.7);
   font-weight: bold;
   color: black;
+  background-image: url("../../../assets/img/crypto-background.jpg");
+  background-position: center;
 }
+
+.buscador-fijo {
+  background-color: rgb(20, 20, 20);
+}
+
+ion-title {
+  color: white;
+  font-weight: bolder;
+  font-size: 1.1rem;
+}
+
 ion-content {
-  --background: #ffd000;
-  font-weight: bold;
-  color: black;
+  font-weight: bolder;
 }
 
 ion-searchbar {
-  --background: rgb(20, 20, 20);
+  --background: rgb(53, 53, 53);
   font-weight: bold;
   color: white;
 }
@@ -21,9 +33,21 @@ ion-item {
   color: white;
 }
 
+ion-label {
+  font-weight: bolder;
+  font-size: 1rem;
+}
+
 .contenedorItem {
   display: flex;
   justify-content: space-between;
+}
+
+.botones {
+  display: flex;
+  align-items: center; /* Alinear verticalmente */
+  gap: 10px; /* Espacio entre los botones */
+  padding-left: 1rem;
 }
 
 .btnVer {
@@ -31,8 +55,6 @@ ion-item {
   font-weight: bold;
   color: rgb(20, 20, 20);
   font-size: 1rem;
-  display: flex;
-  justify-content: space-between;
   height: 1rem;
   width: 3rem;
 }
@@ -46,4 +68,26 @@ ion-button {
     display: flex;
     justify-content: space-between;
   }
+}
+
+ion-title {
+  margin-top: -1rem;
+}
+
+ion-segment {
+  background-color: rgb(20, 20, 20);
+  color: white;
+  font-weight: bolder;
+  margin-top: 2rem;
+}
+
+ion-toolbar {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+ion-searchbar {
+  position: sticky; /* Mantener el buscador fijo */
+  top: 0; /* Fijar en la parte superior */
+  z-index: 10; /* Asegurarte de que esté sobre otros elementos */
 }
