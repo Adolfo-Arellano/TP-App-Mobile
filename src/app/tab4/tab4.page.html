@@ -1,0 +1,72 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="dark">
+    <ion-title class="ion-text-center">Menu de Usuario</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+
+
+<ion-content class="ion-padding" color="dark">
+  <!-- Sección de Información del Usuario -->
+  <ion-card class="user-info-card">
+    <ion-card-content class="ion-text-center">
+      
+      <ion-avatar>
+        <img
+          src="https://e7.pngegg.com/pngimages/84/165/png-clipart-united-states-avatar-organization-information-user-avatar-service-computer-wallpaper-thumbnail.png"
+          alt="User Avatar" />
+      </ion-avatar>
+      <h2 style="text-align: start;">Usuario</h2>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
+
+<ion-list>
+  <!-- Iteramos sobre los usuarios obtenidos desde Firestore -->
+  <ion-item *ngFor="let user of users | async">
+    <ion-label>
+      <h2>{{ user.name }}</h2>
+      <p>{{ user.email }}</p>
+      <p>ID: {{ user.uid }}</p>
+    </ion-label>
+  </ion-item>
+</ion-list>
+
+<ion-list>
+  <ion-item>
+    <ion-input labelPlacement="stacked" label="ID" value="12345678" [readonly]="true" type="password">
+      <ion-button fill="clear" slot="end" aria-label="Show/hide">
+        <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+      </ion-button>
+    </ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-input labelPlacement="stacked" label="Email" placeholder="email@domain.com" [readonly]="true">
+    </ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+    <ion-label>Verificaciones</ion-label>
+    <ion-badge color="success" slot="end">Verificado</ion-badge>
+  </ion-item>
+  <ion-item>
+    <ion-icon name="shield-outline" slot="start"></ion-icon>
+    <ion-label>Seguridad</ion-label>
+  </ion-item>
+  <ion-item>
+    <ion-icon name="logo-twitter" slot="start"></ion-icon>
+    <ion-label>Twitter</ion-label>
+    <ion-note slot="end">Desvinculada</ion-note>
+  </ion-item>
+</ion-list>
+
+<ion-footer>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-button expand="block" color="danger">Cerrar sesión</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-footer>
