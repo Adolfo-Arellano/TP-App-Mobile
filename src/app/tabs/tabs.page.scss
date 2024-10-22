@@ -1,4 +1,5 @@
 ion-icon {
+  font-size: 24px;
   font-weight: bold;
   color: #ffd000;
 }
@@ -7,4 +8,14 @@ ion-label {
   font-weight: bold;
   color: #ffd000;
   -webkit-text-stroke: 0.1px black;
+}
+
+ion-tab-bar {
+  --background: rgba(0, 0, 0, 0.9);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+ion-tab-button {
+  --color: #ffffff;
+  --color-selected: #ffd000;
 }
