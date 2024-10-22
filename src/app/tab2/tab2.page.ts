@@ -12,23 +12,23 @@ export class Tab2Page implements OnInit {
   cryptos: any[] = [];
   buscar: string = '';
   favoritos: any[] = [];
+  sliderTipo: string = 'monedas'; // Valor por defecto para mostrar 'monedas'
 
   constructor(public apiService: ApiService, private router: Router) {}
 
   ngOnInit() {
     this.consumirApi();
     this.consumirApiCrypto();
-    this.favoritos = [
-      ...this.apiService.obtenerFavoritos('moneda'),
-      ...this.apiService.obtenerFavoritos('crypto'),
-    ]; // Obtener favoritos almacenados
+    this.apiService.favoritos$.subscribe((favoritos) => {
+      this.favoritos = favoritos; // Actualiza los favoritos cuando cambian
+    });
   }
 
   consumirApi() {
     this.apiService.obtenerApi().subscribe(
       (moneda: any) => {
         this.monedas = moneda.data;
-        // Añadir la propiedad esFavorito para cada moneda
+        // Añadir la propiedad esFavorito a cada moneda
         this.monedas.forEach((m) => {
           m.esFavorito = this.apiService.esFavorito(m, 'moneda');
         });
@@ -43,13 +43,13 @@ export class Tab2Page implements OnInit {
     this.apiService.obtenerApiCrypto().subscribe(
       (crypto: any) => {
         this.cryptos = crypto.data;
-        // Añadir la propiedad esFavorito para cada criptomoneda
+        // Añadir la propiedad esFavorito a cada criptomoneda
         this.cryptos.forEach((c) => {
           c.esFavorito = this.apiService.esFavorito(c, 'crypto');
         });
       },
       (error) => {
-        console.log('Error al obtener Cryptos', error);
+        console.log('Error al obtener criptos', error);
       }
     );
   }
@@ -81,20 +81,26 @@ export class Tab2Page implements OnInit {
   }
 
   abrirDetalles(item: any) {
-    this.router.navigate(['/detalles', item.id]);
+    this.router.navigate(['/tabs/detalles', 'moneda', item.id]); // Ruta para detalles de monedas
   }
 
   abrirDetallesCrypto(item: any) {
-    this.router.navigate(['/detalles', item.code]);
+    this.router.navigate(['/tabs/detalles', 'crypto', item.code]); // Ruta para detalles de criptos
   }
 
   SeleccionarFavorito(item: any) {
     this.apiService.alternarFavorito(item, 'moneda');
-    item.esFavorito = this.apiService.esFavorito(item, 'moneda');
+    // Actualiza el estado de esFavorito para todas las monedas
+    this.monedas.forEach((m) => {
+      m.esFavorito = this.apiService.esFavorito(m, 'moneda');
+    });
   }
 
   SeleccionarFavoritosCrypto(item: any) {
     this.apiService.alternarFavorito(item, 'crypto');
-    item.esFavorito = this.apiService.esFavorito(item, 'crypto');
+    // Actualiza el estado de esFavorito para todas las criptos
+    this.cryptos.forEach((c) => {
+      c.esFavorito = this.apiService.esFavorito(c, 'crypto');
+    });
   }
 }

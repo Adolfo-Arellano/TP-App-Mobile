@@ -1,11 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  constructor(public http: HttpClient) {}
+  private favoritosSubject = new BehaviorSubject<any[]>([]);
+  public favoritos$ = this.favoritosSubject.asObservable();
+
+  constructor(public http: HttpClient) {
+    // Inicializa los favoritos al cargar el servicio
+    this.actualizarFavoritos();
+  }
 
   obtenerApi() {
     return this.http.get('https://api.coinbase.com/v2/currencies');
@@ -15,10 +22,25 @@ export class ApiService {
     return this.http.get('https://api.coinbase.com/v2/currencies/crypto');
   }
 
+  obtenerPrecioCompra(moneda: string) {
+    const url = `https://api.coinbase.com/v2/prices/${moneda}-USD/buy`;
+    return this.http.get(url);
+  }
+
+  obtenerPrecioVenta(moneda: string) {
+    const url = `https://api.coinbase.com/v2/prices/${moneda}-USD/sell`;
+    return this.http.get(url);
+  }
+
+  obtenerPrecioSpot(moneda: string) {
+    const url = `https://api.coinbase.com/v2/prices/${moneda}-USD/spot`;
+    return this.http.get(url);
+  }
+
   // Método para gestionar favoritos con localStorage
   alternarFavorito(item: any, tipo: string): void {
     const key = tipo === 'moneda' ? 'favoritosMonedas' : 'favoritosCryptos';
-    let favoritos = JSON.parse(localStorage.getItem(key) || '[]');
+    const favoritos = this.obtenerFavoritos(tipo);
 
     // Determinar el identificador correcto según el tipo
     const id = tipo === 'moneda' ? item.id : item.code;
@@ -38,11 +60,19 @@ export class ApiService {
 
     // Guardar la lista actualizada de favoritos
     localStorage.setItem(key, JSON.stringify(favoritos));
+    this.actualizarFavoritos(); // Actualizar la lista de favoritos en el BehaviorSubject
+  }
+
+  private actualizarFavoritos() {
+    const nuevosFavoritos = this.obtenerFavoritos('moneda').concat(
+      this.obtenerFavoritos('crypto')
+    );
+    this.favoritosSubject.next(nuevosFavoritos); // Emitir nuevos favoritos
   }
 
   esFavorito(item: any, tipo: string): boolean {
     const key = tipo === 'moneda' ? 'favoritosMonedas' : 'favoritosCryptos';
-    const favoritos = JSON.parse(localStorage.getItem(key) || '[]');
+    const favoritos = this.obtenerFavoritos(tipo);
 
     // Determinar el identificador correcto según el tipo
     const id = tipo === 'moneda' ? item.id : item.code;
