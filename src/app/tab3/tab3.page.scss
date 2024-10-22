@@ -1,69 +1,105 @@
-/* Fondo negro para todo el contenido */
-ion-content {
-    --background: #342e2e; /* Fondo negro */
-    color: white; /* Texto blanco */
+:host {
+  ion-content {
+    --background: #000000;
   }
-  
-  /* Encabezado y barra de iconos negros */
-  ion-header,
-  ion-toolbar {
-    --background: #312f2f; /* Fondo negro */
-    color: white; /* Texto blanco */
+
+  ion-item {
+    --background: #1a1a1a;
+    --color: white;
+    margin-bottom: 8px;
   }
-  
-  /* Títulos y etiquetas con texto blanco */
-  ion-title,
-  ion-label,
-  ion-card-title,
-  ion-card-content {
-    color: white;
-  }
-  
-  /* Botones amarillos con texto blanco y fuente más grande */
-ion-button {
-    --background: #ffcc00; /* Fondo amarillo */
-    color: #ffffff; /* Texto blanco */
+
+  .selected-currency {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px;
     
-    font-size: 18px; /* Aumentar el tamaño de la letra */
-    font-weight: bold; /* Hacer el texto más grueso */
-    padding: 12px; /* Aumentar el relleno para hacerlo más grande */
-    border-radius: 8px; /* Bordes redondeados */
-    
-    /* Agregar sombra al botón para mejorar la visibilidad */
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-    
-    /* Asegurarse de que el botón tenga un efecto de clic */
-    transition: background-color 0.3s ease;
-    
-    &:hover {
-      --background: #dcba32; /* Cambia ligeramente el color al pasar el mouse */
+    span {
+      color: white;
+      flex-grow: 1;
     }
   }
-  
-  
-  /* Estilo de los ítems (texto blanco en inputs y selects) */
-  ion-item {
-    --background: transparent;
-    color: white;
+
+  .search-container {
+    position: relative;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.95);
+    border-radius: 8px;
+    margin: 8px 0;
+    padding: 8px;
+    
+    .currency-list {
+      height: 60vh;
+      overflow-y: auto;
+      background: #1a1a1a;
+      border-radius: 8px;
+      margin-top: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+      ion-item {
+        --padding-start: 16px;
+        --padding-end: 16px;
+        --min-height: 50px;
+        
+        &:hover {
+          --background: #2a2a2a;
+        }
+      }
+    }
   }
-  
-  /* Cambiar color de las opciones del ion-select */
-  ion-select-option {
-    color: rgb(69, 65, 65); /* Texto negro en las opciones */
-  }
-  
-  /* Estilo para el resultado de la conversión */
-  ion-card {
-    --background: #211e1e; /* Fondo gris oscuro para el resultado */
-    color: white; /* Texto blanco */
-  }
-  
-  ion-card-header {
-    --background: #252323;
-    color: white;
-  }
-  
-  ion-card-content {
+
+  ion-searchbar {
     --background: #1a1a1a;
-    color: white;
+    --color: white;
+    --placeholder-color: #666;
+    --border-radius: 8px;
+    --box-shadow: none;
+    margin-bottom: 8px;
   }
+
+  .conversion-result {
+    margin: 16px 0;
+    text-align: center;
+    
+    ion-card-content {
+      padding: 16px;
+    }
+
+    .conversion-text {
+      font-size: 1.5em;
+      color: white;
+      font-weight: 500;
+    }
+  }
+
+  .calculator-container {
+    margin-top: 20px;
+    padding: 15px;
+  }
+
+  .calculator-display {
+    background: #1a1a1a;
+    color: white;
+    font-size: 24px;
+    text-align: right;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+
+  .calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+
+    ion-button {
+      height: 50px;
+      font-size: 20px;
+      --background: #ffd700;
+      --color: black;
+    }
+  }
+}
