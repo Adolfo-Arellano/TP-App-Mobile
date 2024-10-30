@@ -178,8 +178,8 @@ ion-badge {
   --border-radius: 8px;
   height: 48px;
   font-weight: 500;
-  --background: #ff4961;
-  --color: #ffffff;
+  --background: #ffd000;
+  --color: #000000;
 
   ion-icon {
     margin-right: 8px;
@@ -254,9 +254,9 @@ border-radius: 16px;
     border-radius: 8px;
     text-transform: none;
     padding: 12px 24px;
+    color: #000000;
     
     &.alert-button-cancel {
-      --color: #ffffff;
       background: rgba(255, 255, 255, 0.1);
       
       &:hover {

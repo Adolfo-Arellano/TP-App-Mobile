@@ -117,7 +117,7 @@ export class Tab4Page implements OnInit {
           name: 'email',
           type: 'email',
           placeholder: 'Nuevo email',
-          value: this.user?.email || ''
+          value: ''
         },
         {
           name: 'password',
