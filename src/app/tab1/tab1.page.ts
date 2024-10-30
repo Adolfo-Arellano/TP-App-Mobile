@@ -148,7 +148,6 @@ export class LoginPage {
       if (result.user) {
         await this.presentToast(`Bienvenido ${result.user.email}`);
       }
-      this.router.navigateByUrl('/tabs/tab2');
     } catch (error: any) {
       console.error('Login error:', error);
       const errorMessage = this.getLoginErrorMessage(error.code);

@@ -8,6 +8,8 @@ import { ApiService } from 'src/services/api.service';
 import { HttpClientModule } from '@angular/common/http';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+import { ActionSheetController } from '@ionic/angular';
 import { environment } from '../environments/environment';
 
 @NgModule({
@@ -18,11 +20,13 @@ import { environment } from '../environments/environment';
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireAuthModule,
+    AngularFirestoreModule,
     HttpClientModule,
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     ApiService,
+    ActionSheetController,
   ],
   bootstrap: [AppComponent],
 })

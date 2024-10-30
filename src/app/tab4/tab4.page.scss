@@ -1,0 +1,295 @@
+:host {
+    ion-content {
+      --background: #121212;
+    }
+  }
+  
+  .profile-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  
+  .profile-header {
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+  
+    .profile-avatar {
+      position: relative;
+      cursor: pointer;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+      
+      ion-avatar {
+        width: 100%;
+        height: 100%;
+        border: 3px solid #ffd000;
+        overflow: hidden;
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    
+      .change-photo-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.6);
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+    
+        ion-icon {
+          color: #fff;
+          font-size: 20px;
+        }
+      }
+    
+      &:hover .change-photo-overlay {
+        opacity: 1;
+      }
+    }
+  }
+  
+  .profile-sections {
+    ion-item-group {
+      margin-bottom: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+  
+    ion-item-divider {
+      --background: rgba(255, 255, 255, 0.1);
+      --color: #ffffff;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      min-height: 40px;
+      padding: 8px 16px;
+  
+      ion-label {
+        margin: 0;
+      }
+    }
+  
+    ion-item {
+      --background: transparent;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --inner-padding-end: 8px;
+      
+      &::part(native) {
+        background: transparent;
+      }
+  
+      ion-icon {
+        color: #ffd000;
+        font-size: 20px;
+        margin-right: 16px;
+      }
+  
+      ion-label {
+        h3 {
+          color: #ffffff;
+          font-weight: 500;
+          font-size: 1rem;
+          margin-bottom: 4px;
+        }
+        p {
+          color: rgba(255, 255, 255, 0.6);
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+
+  .profile-edit-alert {
+    --backdrop-opacity: 0.7;
+    
+    .alert-wrapper {
+      --min-width: 320px;
+      --max-width: 90%;
+      --width: 400px;
+      
+      .alert-input-group {
+        padding: 16px;
+        
+        .alert-input {
+          margin-bottom: 16px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 8px;
+          color: white;
+          padding: 12px;
+          
+          &::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+          }
+          
+          &:focus {
+            border-color: #ffd000;
+            outline: none;
+          }
+        }
+      }
+    }
+  }
+  
+  ion-badge {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    --padding-top: 4px;
+    --padding-bottom: 4px;
+    border-radius: 12px;
+    font-weight: normal;
+    font-size: 0.8rem;
+  
+    &[color="success"] {
+      --background: #2dd36f;
+      --color: #ffffff;
+    }
+  
+    &[color="warning"] {
+      --background: #ffd000;
+      --color: #000000;
+    }
+  
+    &[color="medium"] {
+      --background: rgba(255, 255, 255, 0.2);
+      --color: #ffffff;
+    }
+  }
+  
+  .logout-button {
+    margin: 24px 16px;
+    --border-radius: 8px;
+    height: 48px;
+    font-weight: 500;
+    --background: #ff4961;
+    --color: #ffffff;
+  
+    ion-icon {
+      margin-right: 8px;
+    }
+  }
+  
+  // Efecto hover en items clickeables
+  ion-item[button] {
+    cursor: pointer;
+    transition: background-color 0.3s;
+  
+    &:hover {
+      --background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  // Estilos mejorados para los diálogos de alerta
+::ng-deep .alert-wrapper {
+  --background: #1e1e1e;
+  --height: auto;
+  border-radius: 16px;
+  
+  .alert-head {
+    background: #272727;
+    padding: 20px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+
+    .alert-title {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 600;
+    }
+  }
+
+  .alert-message {
+    color: #ffffff;
+    padding: 20px;
+  }
+
+  .alert-input-group {
+    padding: 0 20px;
+    
+    .alert-input {
+      background: #333333;
+      border: none;
+      border-radius: 8px;
+      color: #ffffff;
+      margin-bottom: 10px;
+      padding: 12px;
+      
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+      
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #ffd000;
+      }
+    }
+  }
+
+  .alert-button-group {
+    padding: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    .alert-button {
+      margin: 0;
+      border-radius: 8px;
+      text-transform: none;
+      padding: 12px 24px;
+      
+      &.alert-button-cancel {
+        --color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+      }
+      
+      &:not(.alert-button-cancel) {
+        --color: #000000;
+        background: #ffd000;
+        
+        &:hover {
+          background: #ffda33;
+        }
+      }
+    }
+  }
+}
+
+// Estilos para los campos de input en los diálogos
+ion-alert {
+  .alert-input-wrapper {
+    background: #272727;
+    border-radius: 8px;
+    margin: 8px 0;
+  }
+
+  ion-input {
+    --background: transparent;
+    --color: #ffffff;
+    --placeholder-color: rgba(255, 255, 255, 0.5);
+    --padding-start: 16px;
+    --padding-end: 16px;
+    height: 48px;
+  }
+}

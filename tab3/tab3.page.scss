@@ -1,0 +1,150 @@
+ion-content {
+  --background: rgb(20, 20, 20);
+}
+
+ion-item {
+  --background: gray;
+  --color: rgb(20, 20, 20);
+  margin-bottom: 8px;
+}
+
+.general {
+  --background: none;
+  background-image: url("../../../assets/img/calculador-bg.jpg");
+  background-position: center;
+  --brightness: 0.7;
+}
+
+.ion-padding {
+  --ripple-color: transparent;
+  --background: rgba(0, 0, 0, 0.5);
+}
+
+ion-item {
+  --ripple-color: transparent;
+  --background: rgba(0, 0, 0, 0.9);
+  font-weight: bolder;
+  color: white;
+}
+
+ion-toolbar {
+  --ripple-color: transparent;
+  --background: rgba(0, 0, 0, 0.9);
+  font-weight: bolder;
+  color: white;
+}
+
+.selected-currency {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px;
+  --ripple-color: transparent;
+  --background: rgba(0, 0, 0, 0.5);
+  font-weight: bolder;
+  margin-left: -20rem;
+}
+
+.search-container {
+  position: relative;
+  z-index: 1000;
+
+  .currency-list {
+    max-height: 10rem;
+    overflow: auto;
+    background: rgba(20, 20, 20, 0.5);
+    border-radius: 1rem;
+    margin-top: 8px;
+  }
+}
+
+.seleccionadorBtn {
+  --background: #ffd000;
+}
+
+.cancelarBtn {
+  color: red;
+  ion-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+ion-searchbar {
+  --background: rgb(188, 188, 188);
+  --color: black;
+  --placeholder-color: black;
+}
+
+.conversion-result {
+  margin: 16px 0;
+  text-align: center;
+  font-size: 1.2em;
+
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+.calculadora {
+  --ripple-color: transparent;
+  --background: rgba(0, 0, 0, 0.7);
+  height: 35rem;
+}
+
+.calculator-container {
+  margin-top: 20px;
+  padding: 15px;
+}
+
+.calculator-display {
+  background: rgba(255, 255, 255, 0.7);
+  color: black;
+  font-size: 2rem;
+  text-align: right;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.calculator-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  font-weight: bolder;
+
+  ion-button {
+    font-size: 1.3rem;
+    --background: #ffd700;
+    --color: black;
+  }
+}
+
+ion-card {
+  --background: rgba(0, 0, 0, 0.7);
+  --color: white;
+
+  ion-card-content {
+    font-size: 1.3rem;
+  }
+}
+
+.btnDescargar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 4rem;
+  padding-bottom: 6rem;
+  width: 12rem;
+  height: 2rem;
+  margin: 0 auto;
+  --background: #ffd700;
+}
+
+.parSeleccionado {
+  --color: white;
+  width: 10rem;
+  margin-top: 5rem;
+  margin-right: -25rem;
+  font-weight: bolder;
+}
