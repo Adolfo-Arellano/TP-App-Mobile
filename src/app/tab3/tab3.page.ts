@@ -1,6 +1,31 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from 'src/services/api.service';
-import axios from 'axios';
+import { ApiService, Currency } from 'src/services/api.service';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+
+(<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
+
+interface ConversionResponse {
+  data: {
+    amount: string;
+  };
+}
+
+interface PdfStyles {
+  [key: string]: {
+    fontSize?: number;
+    bold?: boolean;
+    margin?: [number, number, number, number];
+  };
+}
+
+interface PdfDefinition {
+  content: Array<{
+    text: string;
+    style?: string;
+  }>;
+  styles: PdfStyles;
+}
 
 @Component({
   selector: 'app-tab3',
@@ -8,14 +33,17 @@ import axios from 'axios';
   styleUrls: ['./tab3.page.scss'],
 })
 export class Tab3Page implements OnInit {
-  monedas: any[] = [];
-  cryptos: any[] = [];
-  filteredCurrencies: any[] = [];
+  monedas: Currency[] = [];
+  cryptos: Currency[] = [];
+  filteredCurrencies: Currency[] = [];
+  favoritosMonedas: Currency[] = [];
+  favoritosCryptos: Currency[] = [];
+  archivoPdf: any;
 
   fromType: string = '';
   toType: string = '';
-  fromCurrency: any = null;
-  toCurrency: any = null;
+  fromCurrency: Currency | null = null;
+  toCurrency: Currency | null = null;
   amount: string = '';
   conversionResult: number = 0;
   searchTerm: string = '';
@@ -38,39 +66,61 @@ export class Tab3Page implements OnInit {
     { value: 'C', display: 'C' },
     { value: 0, display: '0' },
     { value: '⌫', display: '⌫' },
+    { value: ',', display: ',' },
   ];
 
   constructor(public apiService: ApiService) {}
 
-  ngOnInit() {
-    this.consumirApi();
-    this.consumirApiCrypto();
+  async ngOnInit() {
+    try {
+      await Promise.all([
+        this.consumirApi(),
+        this.consumirApiCrypto()
+      ]);
+      this.cargarFavoritos();
+    } catch (error) {
+      console.error('Error al inicializar:', error);
+    }
   }
 
-  consumirApi() {
-    this.apiService.obtenerApi().subscribe({
-      next: (moneda: any) => {
-        this.monedas = this.ordenarAlfabeticamente(moneda.data);
-      },
-      error: (error) => console.error('Error al obtener monedas:', error),
+  cargarFavoritos() {
+    this.favoritosMonedas = this.apiService.obtenerFavoritos('moneda');
+    this.favoritosCryptos = this.apiService.obtenerFavoritos('crypto');
+    console.log('Favoritos cargados:', {
+      monedas: this.favoritosMonedas,
+      cryptos: this.favoritosCryptos
     });
   }
 
-  consumirApiCrypto() {
-    this.apiService.obtenerApiCrypto().subscribe({
-      next: (crypto: any) => {
-        this.cryptos = this.ordenarAlfabeticamente(crypto.data);
-      },
-      error: (error) => console.error('Error al obtener cryptos:', error),
-    });
+  async consumirApi() {
+    try {
+      const response = await this.apiService.obtenerApi().toPromise();
+      if (response?.data) {
+        this.monedas = this.ordenarAlfabeticamente(response.data);
+      }
+    } catch (error) {
+      console.error('Error al obtener monedas:', error);
+    }
   }
 
-  ordenarAlfabeticamente(lista: any[]): any[] {
-    return lista.sort((a, b) => a.name.localeCompare(b.name));
+  async consumirApiCrypto() {
+    try {
+      const response = await this.apiService.obtenerApiCrypto().toPromise();
+      if (response?.data) {
+        this.cryptos = this.ordenarAlfabeticamente(response.data);
+      }
+    } catch (error) {
+      console.error('Error al obtener cryptos:', error);
+    }
+  }
+
+  ordenarAlfabeticamente(lista: Currency[]): Currency[] {
+    return [...lista].sort((a, b) => a.name.localeCompare(b.name));
   }
 
   seleccionarTipo(tipo: string, origen: 'from' | 'to') {
     this.searchTerm = '';
+    
     if (origen === 'from') {
       this.fromType = tipo;
       this.fromCurrency = null;
@@ -86,19 +136,42 @@ export class Tab3Page implements OnInit {
       this.isSelectingFrom = false;
       this.showFromSearch = false;
     }
+
+    this.cargarFavoritos();
     this.actualizarListaFiltrada();
   }
 
   actualizarListaFiltrada() {
     const tipo = this.isSelectingFrom ? this.fromType : this.toType;
-    let lista = tipo === 'monedas' ? this.monedas : this.cryptos;
+    let lista: Currency[] = [];
+
+    switch (tipo) {
+      case 'favoritosMonedas':
+        lista = [...this.favoritosMonedas];
+        break;
+      case 'favoritosCryptos':
+        lista = [...this.favoritosCryptos];
+        break;
+      case 'monedas':
+        lista = [...this.monedas];
+        break;
+      case 'cryptos':
+        lista = [...this.cryptos];
+        break;
+    }
 
     if (this.searchTerm) {
-      lista = lista.filter((item) =>
-        item.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
+      const searchLower = this.searchTerm.toLowerCase();
+      lista = lista.filter((item: Currency) => {
+        if (!item) return false;
+        const nameMatch = item.name.toLowerCase().includes(searchLower);
+        const idMatch = ((item.id || item.code) || '').toLowerCase().includes(searchLower);
+        return nameMatch || idMatch;
+      });
     }
+
     this.filteredCurrencies = lista;
+    console.log('Lista filtrada:', this.filteredCurrencies);
   }
 
   buscar(evento: any) {
@@ -106,7 +179,7 @@ export class Tab3Page implements OnInit {
     this.actualizarListaFiltrada();
   }
 
-  seleccionarMoneda(currency: any) {
+  seleccionarMoneda(currency: Currency) {
     if (this.isSelectingFrom) {
       this.fromCurrency = currency;
       this.showFromSearch = false;
@@ -116,25 +189,81 @@ export class Tab3Page implements OnInit {
       this.showToSearch = false;
       this.isSelectingTo = false;
     }
+    
     this.searchTerm = '';
+    if (this.fromCurrency && this.toCurrency && this.amount) {
+      this.convertir();
+    }
+  }
+
+  async convertir() {
+    if (!this.fromCurrency || !this.toCurrency || !this.amount) {
+      this.conversionResult = 0;
+      return;
+    }
+
+    try {
+      const parsedAmount = parseFloat(this.amount.replace(',', '.'));
+      if (isNaN(parsedAmount)) {
+        this.conversionResult = 0;
+        return;
+      }
+
+      const fromId = this.fromCurrency.id || this.fromCurrency.code;
+      const toId = this.toCurrency.id || this.toCurrency.code;
+
+      if (!fromId || !toId) {
+        console.error('IDs de moneda no válidos');
+        return;
+      }
+
+      const response = await this.apiService.obtenerPreciosConversion(fromId, toId).toPromise();
+      if (response?.data?.amount) {
+        const conversion = parsedAmount * parseFloat(response.data.amount);
+        this.conversionResult = parseFloat(conversion.toFixed(3));
+      } else {
+        console.error('Respuesta de conversión inválida:', response);
+        this.conversionResult = 0;
+      }
+    } catch (error) {
+      console.error('Error en la conversión:', error);
+      this.conversionResult = 0;
+    }
   }
 
   handleCalculatorInput(value: string | number) {
     if (value === 'C') {
-      this.clear();
+      this.limpiar();
     } else if (value === '⌫') {
       this.borrarUltimo();
+    } else if (value === ',') {
+      this.agregarComa();
     } else {
-      this.appendNumber(value.toString());
+      this.agregarNumero(value.toString());
     }
   }
 
-  appendNumber(number: string) {
-    this.amount += number;
+  agregarNumero(number: string) {
+    if (number === '0' && this.amount === '0') return;
+    
+    if (this.amount === '0') {
+      this.amount = number;
+    } else {
+      this.amount += number;
+    }
+    
     this.convertir();
   }
 
-  clear() {
+  agregarComa() {
+    if (!this.amount) {
+      this.amount = '0,';
+    } else if (!this.amount.includes(',')) {
+      this.amount += ',';
+    }
+  }
+
+  limpiar() {
     this.amount = '';
     this.conversionResult = 0;
   }
@@ -145,27 +274,6 @@ export class Tab3Page implements OnInit {
       this.convertir();
     } else {
       this.conversionResult = 0;
-    }
-  }
-
-  async convertir() {
-    if (!this.fromCurrency || !this.toCurrency || !this.amount) return;
-
-    try {
-      const fromId =
-        this.fromType === 'monedas'
-          ? this.fromCurrency.id
-          : this.fromCurrency.code;
-      const toId =
-        this.toType === 'monedas' ? this.toCurrency.id : this.toCurrency.code;
-
-      const response = await axios.get(
-        `https://api.coinbase.com/v2/prices/${fromId}-${toId}/spot`
-      );
-      this.conversionResult =
-        parseFloat(this.amount) * response.data.data.amount;
-    } catch (error) {
-      console.error('Error en la conversión:', error);
     }
   }
 
@@ -182,6 +290,54 @@ export class Tab3Page implements OnInit {
       this.isSelectingTo = false;
     }
     this.conversionResult = 0;
-    this.amount = '';
+  }
+
+  descargarPdf() {
+    if (!this.fromCurrency || !this.toCurrency || !this.amount || !this.conversionResult) {
+      console.error('Faltan datos para generar el PDF');
+      return;
+    }
+
+    const pdfDefinition: PdfDefinition = {
+      content: [
+        { text: 'CryptoApp', style: 'header' },
+        { text: 'Comprobante de conversión', style: 'header' },
+        {
+          text: `De: ${this.fromCurrency.name} - ${
+            this.fromCurrency.id ?? this.fromCurrency.code
+          }`,
+        },
+        {
+          text: `A: ${this.toCurrency.name} - ${
+            this.toCurrency.id ?? this.toCurrency.code
+          }`,
+        },
+        {
+          text: `Cantidad: $ ${this.amount} ${this.fromCurrency.name} - ${
+            this.fromCurrency.id ?? this.fromCurrency.code
+          }`,
+        },
+        {
+          text: `Resultado: $ ${this.conversionResult} ${
+            this.toCurrency.name
+          } - ${this.toCurrency.id ?? this.toCurrency.code}`,
+        },
+        { text: '¡Gracias por usar CryptoApp!' },
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          margin: [0, 0, 0, 10]
+        }
+      }
+    };
+
+    try {
+      this.archivoPdf = pdfMake.createPdf(pdfDefinition);
+      this.archivoPdf.download('comprobanteConversion.pdf');
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
+    }
   }
 }

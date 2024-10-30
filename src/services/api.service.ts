@@ -1,89 +1,101 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+export interface Currency {
+  name: string;
+  id?: string;
+  code?: string;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  private favoritosSubject = new BehaviorSubject<any[]>([]);
+  private favoritosSubject = new BehaviorSubject<Currency[]>([]);
   public favoritos$ = this.favoritosSubject.asObservable();
 
   constructor(public http: HttpClient) {
-    // Inicializa los favoritos al cargar el servicio
     this.actualizarFavoritos();
   }
 
-  obtenerApi() {
-    return this.http.get('https://api.coinbase.com/v2/currencies');
+  obtenerApi(): Observable<ApiResponse<Currency[]>> {
+    return this.http.get<ApiResponse<Currency[]>>('https://api.coinbase.com/v2/currencies');
   }
 
-  obtenerApiCrypto() {
-    return this.http.get('https://api.coinbase.com/v2/currencies/crypto');
+  obtenerApiCrypto(): Observable<ApiResponse<Currency[]>> {
+    return this.http.get<ApiResponse<Currency[]>>('https://api.coinbase.com/v2/currencies/crypto');
   }
 
-  obtenerPrecioCompra(moneda: string) {
-    const url = `https://api.coinbase.com/v2/prices/${moneda}-USD/buy`;
-    return this.http.get(url);
+  obtenerPrecioCompra(moneda: string): Observable<ApiResponse<{ amount: string }>> {
+    return this.http.get<ApiResponse<{ amount: string }>>(
+      `https://api.coinbase.com/v2/prices/${moneda}-USD/buy`
+    );
   }
 
-  obtenerPrecioVenta(moneda: string) {
-    const url = `https://api.coinbase.com/v2/prices/${moneda}-USD/sell`;
-    return this.http.get(url);
+  obtenerPrecioVenta(moneda: string): Observable<ApiResponse<{ amount: string }>> {
+    return this.http.get<ApiResponse<{ amount: string }>>(
+      `https://api.coinbase.com/v2/prices/${moneda}-USD/sell`
+    );
   }
 
-  obtenerPrecioSpot(moneda: string) {
-    const url = `https://api.coinbase.com/v2/prices/${moneda}-USD/spot`;
-    return this.http.get(url);
+  obtenerPrecioSpot(moneda: string): Observable<ApiResponse<{ amount: string }>> {
+    return this.http.get<ApiResponse<{ amount: string }>>(
+      `https://api.coinbase.com/v2/prices/${moneda}-USD/spot`
+    );
   }
 
-  // Método para gestionar favoritos con localStorage
-  alternarFavorito(item: any, tipo: string): void {
+  obtenerPreciosConversion(fromId: string, toId: string): Observable<ApiResponse<{ amount: string }>> {
+    return this.http.get<ApiResponse<{ amount: string }>>(
+      `https://api.coinbase.com/v2/prices/${fromId}-${toId}/spot`
+    );
+  }
+
+  alternarFavorito(item: Currency, tipo: string): void {
     const key = tipo === 'moneda' ? 'favoritosMonedas' : 'favoritosCryptos';
     const favoritos = this.obtenerFavoritos(tipo);
-
-    // Determinar el identificador correcto según el tipo
     const id = tipo === 'moneda' ? item.id : item.code;
 
-    // Verificar si el ítem ya es favorito
     const index = favoritos.findIndex(
-      (fav: any) => (tipo === 'moneda' ? fav.id : fav.code) === id
+      (fav: Currency) => (tipo === 'moneda' ? fav.id : fav.code) === id
     );
 
     if (index > -1) {
-      // Si ya es favorito, eliminarlo
       favoritos.splice(index, 1);
     } else {
-      // Si no es favorito, agregarlo
       favoritos.push({ ...item });
     }
 
-    // Guardar la lista actualizada de favoritos
     localStorage.setItem(key, JSON.stringify(favoritos));
-    this.actualizarFavoritos(); // Actualizar la lista de favoritos en el BehaviorSubject
+    this.actualizarFavoritos();
   }
 
-  private actualizarFavoritos() {
-    const nuevosFavoritos = this.obtenerFavoritos('moneda').concat(
-      this.obtenerFavoritos('crypto')
-    );
-    this.favoritosSubject.next(nuevosFavoritos); // Emitir nuevos favoritos
+  private actualizarFavoritos(): void {
+    const monedasFavoritas = this.obtenerFavoritos('moneda');
+    const cryptosFavoritas = this.obtenerFavoritos('crypto');
+    this.favoritosSubject.next([...monedasFavoritas, ...cryptosFavoritas]);
   }
 
-  esFavorito(item: any, tipo: string): boolean {
-    const key = tipo === 'moneda' ? 'favoritosMonedas' : 'favoritosCryptos';
+  esFavorito(item: Currency, tipo: string): boolean {
     const favoritos = this.obtenerFavoritos(tipo);
-
-    // Determinar el identificador correcto según el tipo
     const id = tipo === 'moneda' ? item.id : item.code;
-
     return favoritos.some(
-      (fav: any) => (tipo === 'moneda' ? fav.id : fav.code) === id
+      (fav: Currency) => (tipo === 'moneda' ? fav.id : fav.code) === id
     );
   }
 
-  obtenerFavoritos(tipo: string): any[] {
+  obtenerFavoritos(tipo: string): Currency[] {
     const key = tipo === 'moneda' ? 'favoritosMonedas' : 'favoritosCryptos';
-    return JSON.parse(localStorage.getItem(key) || '[]');
+    const favoritosStr = localStorage.getItem(key);
+    try {
+      return favoritosStr ? JSON.parse(favoritosStr) : [];
+    } catch (error) {
+      console.error('Error al parsear favoritos:', error);
+      return [];
+    }
   }
 }

@@ -1,93 +1,145 @@
 ion-toolbar {
-  --ripple-color: transparent;
   --background: rgba(0, 0, 0, 0.7);
-  font-weight: bold;
-  color: black;
+  --color: white;
   background-image: url("../../../assets/img/crypto-background.jpg");
   background-position: center;
+  background-size: cover;
+  padding: 1rem 0 0;
+
+  ion-title {
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 0.5rem 0;
+    text-align: center;
+  }
 }
 
-.buscador-fijo {
-  background-color: rgb(20, 20, 20);
-}
+.segment-container {
+  background: rgba(0, 0, 0, 0.5);
+  padding-top: 0.5rem;
+  
+  ion-segment {
+    --background: transparent;
+    padding: 0 1rem;
+    
+    ion-segment-button {
+      --background: transparent;
+      --background-checked: transparent;
+      --color: white;
+      --color-checked: #ffd000;
+      --indicator-color: #ffd000;
+      // min-height: 35px;
+      height: 25px;
+      font-weight: bold;
+      text-transform: none;
+      opacity: 0.7;
+      
+      &.segment-button-checked {
+        opacity: 1;
+      }
 
-ion-title {
-  color: white;
-  font-weight: bolder;
-  font-size: 1.1rem;
+      ion-label {
+        font-size: 1rem;
+      }
+    }
+  }
 }
 
 ion-content {
-  font-weight: bolder;
+  --background: #1a1a1a;
+  --color: white;
+  padding-top: 1rem;
+
+  ion-searchbar {
+    --background: #333333;
+    --color: white;
+    --placeholder-color: #888888;
+    --icon-color: #888888;
+    --border-radius: 4px;
+    margin-bottom: 0.5rem;
+    padding-top: 0.5rem;
+  }
 }
 
-ion-searchbar {
-  --background: rgb(53, 53, 53);
-  font-weight: bold;
-  color: white;
-}
-
-ion-item {
-  --background: rgb(20, 20, 20);
-  font-weight: bold;
-  color: white;
-}
-
-ion-label {
-  font-weight: bolder;
-  font-size: 1rem;
+.lista-contenedor {
+  background: #1a1a1a;
 }
 
 .contenedorItem {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #1a1a1a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  
+  .moneda-info {
+    h2 {
+      margin: 0;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    p {
+      margin: 0.2rem 0 0 0;
+      color: #888888;
+      font-size: 0.9rem;
+    }
+  }
 }
 
 .botones {
   display: flex;
-  align-items: center; /* Alinear verticalmente */
-  gap: 10px; /* Espacio entre los botones */
-  padding-left: 1rem;
-}
+  align-items: center;
+  gap: 0.8rem;
 
-.btnVer {
-  --background: #ffd000;
-  font-weight: bold;
-  color: rgb(20, 20, 20);
-  font-size: 1rem;
-  height: 1rem;
-  width: 3rem;
-}
-
-ion-button {
-  --background: rgb(20, 20, 20);
-  ion-icon {
+  .btnVer {
+    --background: #ffd000;
+    --color: #1a1a1a;
+    --border-radius: 4px;
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    --box-shadow: none;
+    height: 2rem;
+    font-size: 0.9rem;
     font-weight: bold;
+    text-transform: none;
+    margin: 0;
+  }
+
+  ion-icon {
+    font-size: 1.3rem;
     color: #ffd000;
-    font-size: 1rem;
-    display: flex;
-    justify-content: space-between;
+    cursor: pointer;
   }
 }
 
-ion-title {
-  margin-top: -1rem;
+ion-tab-bar {
+  --background: #1a1a1a;
+  --color: #888888;
+  --color-selected: #ffd000;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  ion-tab-button {
+    --color: #888888;
+    --color-selected: #ffd000;
+
+    ion-icon {
+      font-size: 1.3rem;
+    }
+
+    ion-label {
+      font-size: 0.8rem;
+    }
+  }
 }
 
-ion-segment {
-  background-color: rgb(20, 20, 20);
-  color: white;
-  font-weight: bolder;
-  margin-top: 2rem;
+// Asegurar que no haya bordes o fondos no deseados
+ion-header::after {
+  display: none;
 }
 
-ion-toolbar {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-ion-searchbar {
-  position: sticky; /* Mantener el buscador fijo */
-  top: 0; /* Fijar en la parte superior */
-  z-index: 10; /* Asegurarte de que esté sobre otros elementos */
+ion-header ion-toolbar {
+  --border-width: 0;
 }

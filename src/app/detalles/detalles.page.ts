@@ -140,16 +140,21 @@ export class DetallesPage implements OnInit {
 
   toggleFavorito() {
     this.apiService.alternarFavorito(this.itemDetalles, this.tipo);
+
+    // Actualizar estado inmediatamente
     this.itemDetalles.esFavorito = this.apiService.esFavorito(
       this.itemDetalles,
       this.tipo
     );
 
-    // Aquí puedes añadir una lógica para volver a la página de favoritos
-    // y asegurarte de que los favoritos se actualizan
+    // Suscribirse a los cambios de favoritos
     this.apiService.favoritos$.subscribe((favoritos) => {
       this.itemDetalles.esFavorito = favoritos.some(
-        (fav) => fav.id === this.itemDetalles.id
+        (fav) =>
+          (this.tipo === 'moneda' ? fav.id : fav.code) ===
+          (this.tipo === 'moneda'
+            ? this.itemDetalles.id
+            : this.itemDetalles.code)
       );
     });
   }

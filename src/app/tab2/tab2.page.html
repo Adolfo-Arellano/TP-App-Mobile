@@ -1,76 +1,65 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Seleccionar Tipo</ion-title>
-    <ion-segment [(ngModel)]="sliderTipo">
-      <ion-segment-button value="monedas">
-        <ion-label>Monedas</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="cryptos">
-        <ion-label>Criptos</ion-label>
-      </ion-segment-button>
-    </ion-segment>
+    <ion-title class="ion-text-center">Seleccionar Tipo</ion-title>
+    <div class="segment-container">
+      <ion-segment [(ngModel)]="sliderTipo">
+        <ion-segment-button value="monedas">
+          <ion-label>Monedas</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="cryptos">
+          <ion-label>Cryptos</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-searchbar
-    (ionInput)="sliderTipo === 'monedas' ? buscador($event) : buscadorCrypto($event)"
-    placeholder="Buscar {{ sliderTipo === 'monedas' ? 'moneda' : 'crypto' }}..."
-    class="buscador-fijo"
-  ></ion-searchbar>
-  <!-- Mostrar monedas cuando el valor del slider es 'monedas' -->
-  <div *ngIf="sliderTipo === 'monedas'">
-    <ion-list>
-      <ion-item *ngFor="let moneda of monedas">
-        <ion-label>
-          <div class="contenedorItem">
-            <div>
-              <h2>{{ moneda.name }}</h2>
-              <p>{{ moneda.id }}</p>
-            </div>
-            <div class="botones">
-              <ion-button class="btnVer" (click)="abrirDetalles(moneda)">
-                Ver
-              </ion-button>
-              <ion-button fill="clear" (click)="SeleccionarFavorito(moneda)">
-                <ion-icon
-                  [name]="moneda.esFavorito ? 'star' : 'star-outline'"
-                ></ion-icon>
-              </ion-button>
-            </div>
-          </div>
-        </ion-label>
-      </ion-item>
-    </ion-list>
+    *ngIf="sliderTipo === 'monedas'"
+    (ionChange)="buscador($event)"
+    placeholder="Buscar moneda...">
+  </ion-searchbar>
+
+  <ion-searchbar
+    *ngIf="sliderTipo === 'cryptos'"
+    (ionChange)="buscadorCrypto($event)"
+    placeholder="Buscar crypto...">
+  </ion-searchbar>
+
+  <div *ngIf="sliderTipo === 'monedas'" class="lista-contenedor">
+    <div class="contenedorItem" *ngFor="let moneda of monedas">
+      <div class="moneda-info">
+        <h2>{{ moneda.name }}</h2>
+        <p>{{ moneda.id }}</p>
+      </div>
+      <div class="botones">
+        <ion-button class="btnVer" (click)="abrirDetalles(moneda)">
+          Ver
+        </ion-button>
+        <ion-icon
+          [name]="moneda.esFavorito ? 'star' : 'star-outline'"
+          (click)="SeleccionarFavorito(moneda)">
+        </ion-icon>
+      </div>
+    </div>
   </div>
 
-  <!-- Mostrar criptos cuando el valor del slider es 'cryptos' -->
-  <div *ngIf="sliderTipo === 'cryptos'">
-    <ion-list>
-      <ion-item *ngFor="let crypto of cryptos">
-        <ion-label>
-          <div class="contenedorItem">
-            <div>
-              <h2>{{ crypto.name }}</h2>
-              <p>{{ crypto.code }}</p>
-              <!-- Cambia moneda.id a crypto.code -->
-            </div>
-            <div class="botones">
-              <ion-button class="btnVer" (click)="abrirDetallesCrypto(crypto)">
-                Ver
-              </ion-button>
-              <ion-button
-                fill="clear"
-                (click)="SeleccionarFavoritosCrypto(crypto)"
-              >
-                <ion-icon
-                  [name]="crypto.esFavorito ? 'star' : 'star-outline'"
-                ></ion-icon>
-              </ion-button>
-            </div>
-          </div>
-        </ion-label>
-      </ion-item>
-    </ion-list>
+  <div *ngIf="sliderTipo === 'cryptos'" class="lista-contenedor">
+    <div class="contenedorItem" *ngFor="let crypto of cryptos">
+      <div class="moneda-info">
+        <h2>{{ crypto.name }}</h2>
+        <p>{{ crypto.code }}</p>
+      </div>
+      <div class="botones">
+        <ion-button class="btnVer" (click)="abrirDetallesCrypto(crypto)">
+          Ver
+        </ion-button>
+        <ion-icon
+          [name]="crypto.esFavorito ? 'star' : 'star-outline'"
+          (click)="SeleccionarFavoritosCrypto(crypto)">
+        </ion-icon>
+      </div>
+    </div>
   </div>
 </ion-content>

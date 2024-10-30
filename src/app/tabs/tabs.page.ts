@@ -18,4 +18,16 @@ export class TabsPage {
       this.isLoginPage = event.url.includes('/tab1');
     });
   }
+
+  navigateToTab1() {
+    this.router.navigate(['/tabs/tab1'], { replaceUrl: true });
+  }
+
+  navigateToTab2() {
+    this.router.navigate(['/tabs/tab2'], { replaceUrl: true });
+  }
+
+  navigateToTab3() {
+    this.router.navigate(['/tabs/tab3'], { replaceUrl: true });
+  }
 }

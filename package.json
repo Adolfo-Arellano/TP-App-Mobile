@@ -34,6 +34,7 @@
     "axios": "^1.7.7",
     "firebase": "^10.14.1",
     "ionicons": "^7.0.0",
+    "pdfmake": "^0.2.14",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.2"
@@ -63,6 +64,7 @@
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
+    "@types/pdfmake": "^0.2.9",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.4.0"
   },
