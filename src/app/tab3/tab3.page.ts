@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from 'src/services/api.service';
-import axios from 'axios';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+
+(<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
   selector: 'app-tab3',
@@ -11,6 +14,9 @@ export class Tab3Page implements OnInit {
   monedas: any[] = [];
   cryptos: any[] = [];
   filteredCurrencies: any[] = [];
+  favoritosMonedas: any[] = [];
+  favoritosCryptos: any[] = [];
+  archivoPdf: any;
 
   fromType: string = '';
   toType: string = '';
@@ -38,6 +44,7 @@ export class Tab3Page implements OnInit {
     { value: 'C', display: 'C' },
     { value: 0, display: '0' },
     { value: '⌫', display: '⌫' },
+    { value: ',', display: ',' },
   ];
 
   constructor(public apiService: ApiService) {}
@@ -45,24 +52,30 @@ export class Tab3Page implements OnInit {
   ngOnInit() {
     this.consumirApi();
     this.consumirApiCrypto();
+    this.consumirFavoritosMonedas();
+    this.consumirFavoritosCryptos();
   }
 
   consumirApi() {
-    this.apiService.obtenerApi().subscribe({
-      next: (moneda: any) => {
-        this.monedas = this.ordenarAlfabeticamente(moneda.data);
-      },
-      error: (error) => console.error('Error al obtener monedas:', error),
+    this.apiService.obtenerApi().subscribe((moneda: any) => {
+      this.monedas = this.ordenarAlfabeticamente(moneda.data);
     });
   }
 
   consumirApiCrypto() {
-    this.apiService.obtenerApiCrypto().subscribe({
-      next: (crypto: any) => {
-        this.cryptos = this.ordenarAlfabeticamente(crypto.data);
-      },
-      error: (error) => console.error('Error al obtener cryptos:', error),
+    this.apiService.obtenerApiCrypto().subscribe((crypto: any) => {
+      this.cryptos = this.ordenarAlfabeticamente(crypto.data);
     });
+  }
+
+  consumirFavoritosMonedas() {
+    this.favoritosMonedas = this.apiService.obtenerFavoritos('moneda');
+    this.favoritosMonedas = this.ordenarAlfabeticamente(this.favoritosMonedas);
+  }
+
+  consumirFavoritosCryptos() {
+    this.favoritosCryptos = this.apiService.obtenerFavoritos('crypto');
+    this.favoritosCryptos = this.ordenarAlfabeticamente(this.favoritosCryptos);
   }
 
   ordenarAlfabeticamente(lista: any[]): any[] {
@@ -91,12 +104,34 @@ export class Tab3Page implements OnInit {
 
   actualizarListaFiltrada() {
     const tipo = this.isSelectingFrom ? this.fromType : this.toType;
-    let lista = tipo === 'monedas' ? this.monedas : this.cryptos;
-
+    let lista: any = [];
+    if (
+      this.fromType == 'favoritosMonedas' ||
+      this.fromType == 'favoritosCryptos'
+    ) {
+      lista =
+        tipo === 'favoritosMonedas'
+          ? this.favoritosMonedas
+          : this.favoritosCryptos;
+    } else {
+      lista = tipo === 'monedas' ? this.monedas : this.cryptos;
+    }
     if (this.searchTerm) {
-      lista = lista.filter((item) =>
-        item.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
+      lista = lista.filter((item: any) => {
+        let results = [];
+
+        if (tipo == 'monedas' || tipo == 'favoritosMonedas') {
+          results =
+            item.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+            item.id.toLowerCase().includes(this.searchTerm.toLowerCase());
+        } else {
+          results =
+            item.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+            item.code.toLowerCase().includes(this.searchTerm.toLowerCase());
+        }
+
+        return results;
+      });
     }
     this.filteredCurrencies = lista;
   }
@@ -121,20 +156,33 @@ export class Tab3Page implements OnInit {
 
   handleCalculatorInput(value: string | number) {
     if (value === 'C') {
-      this.clear();
+      this.limpiar();
     } else if (value === '⌫') {
       this.borrarUltimo();
+    } else if (value === ',') {
+      this.agregarComa();
     } else {
-      this.appendNumber(value.toString());
+      this.agregarNumero(value.toString());
     }
   }
 
-  appendNumber(number: string) {
+  agregarNumero(number: string) {
+    // Evitar que haya ceros iniciales seguidos de otros números (a menos que haya una coma después)
+    if (number === '0' && this.amount === '0') return;
+
+    // Concatenar el número
     this.amount += number;
     this.convertir();
   }
 
-  clear() {
+  agregarComa() {
+    // Evitar múltiples comas en el mismo número
+    if (!this.amount.includes(',')) {
+      this.amount += ',';
+    }
+  }
+
+  limpiar() {
     this.amount = '';
     this.conversionResult = 0;
   }
@@ -152,6 +200,13 @@ export class Tab3Page implements OnInit {
     if (!this.fromCurrency || !this.toCurrency || !this.amount) return;
 
     try {
+      // Reemplazar la coma por un punto antes de convertir
+      const parsedAmount = parseFloat(this.amount.replace(',', '.'));
+      if (isNaN(parsedAmount)) {
+        this.conversionResult = 0;
+        return;
+      }
+
       const fromId =
         this.fromType === 'monedas'
           ? this.fromCurrency.id
@@ -159,11 +214,13 @@ export class Tab3Page implements OnInit {
       const toId =
         this.toType === 'monedas' ? this.toCurrency.id : this.toCurrency.code;
 
-      const response = await axios.get(
-        `https://api.coinbase.com/v2/prices/${fromId}-${toId}/spot`
-      );
-      this.conversionResult =
-        parseFloat(this.amount) * response.data.data.amount;
+      this.apiService
+        .obtenerPreciosConversion(fromId, toId)
+        .subscribe((response: any) => {
+          const conversion = parsedAmount * parseFloat(response.data.amount);
+          // Limitar a 3 decimales con toFixed y convertir a número
+          this.conversionResult = parseFloat(conversion.toFixed(3));
+        });
     } catch (error) {
       console.error('Error en la conversión:', error);
     }
@@ -183,5 +240,37 @@ export class Tab3Page implements OnInit {
     }
     this.conversionResult = 0;
     this.amount = '';
+  }
+
+  descargarPdf() {
+    var pdf = {
+      content: [
+        { text: 'Comprobante de conversión', style: 'header' },
+        {
+          text: `De: ${this.fromCurrency.name} (${
+            this.fromCurrency.id ?? this.fromCurrency.code
+          })`,
+        },
+        {
+          text: `A: ${this.toCurrency.name} (${
+            this.toCurrency.id ?? this.toCurrency.code
+          })`,
+        },
+        {
+          text: `Cantidad: ${this.amount} (${
+            this.fromCurrency.id ?? this.toCurrency.code
+          })`,
+        },
+        {
+          text: `Resultado: ${this.conversionResult} ${
+            this.toCurrency.id ?? this.toCurrency.code
+          }`,
+        },
+      ],
+    };
+    this.archivoPdf = pdfMake.createPdf(pdf);
+    console.log('Archivo PDF creado');
+    this.archivoPdf.download('comprobanteConversion.pdf');
+    console.log('Archivo PDF descargado');
   }
 }

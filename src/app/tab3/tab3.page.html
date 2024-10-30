@@ -12,7 +12,18 @@
         <ion-label>De:</ion-label>
         <ion-button
           class="seleccionadorBtn"
-          *ngIf="!fromType"
+          expand="block"
+          (click)="seleccionarTipo('favoritosMonedas', 'from')"
+          ><ion-icon name="star" slot="start"></ion-icon>Monedas</ion-button
+        >
+        <ion-button
+          class="seleccionadorBtn"
+          expand="block"
+          (click)="seleccionarTipo('favoritosCryptos', 'from')"
+          ><ion-icon name="star" slot="start"></ion-icon>Cryptos</ion-button
+        >
+        <ion-button
+          class="seleccionadorBtn"
           expand="block"
           (click)="seleccionarTipo('monedas', 'from')"
         >
@@ -20,14 +31,16 @@
         </ion-button>
         <ion-button
           class="seleccionadorBtn"
-          *ngIf="!fromType"
           expand="block"
           (click)="seleccionarTipo('cryptos', 'from')"
         >
           Criptomonedas
         </ion-button>
         <div *ngIf="fromCurrency" class="selected-currency">
-          <span>{{fromCurrency.name}}</span>
+          <span class="parSeleccionado"
+            >{{fromCurrency.name}} - {{fromCurrency.id ??
+            fromCurrency.code}}</span
+          >
           <ion-button
             class="cancelarBtn"
             fill="clear"
@@ -40,10 +53,7 @@
 
       <!-- Búsqueda y lista "De:" -->
       <div *ngIf="showFromSearch" class="search-container">
-        <ion-searchbar
-          (ionInput)="buscar($event)"
-          placeholder="Buscar moneda..."
-        >
+        <ion-searchbar (ionInput)="buscar($event)" placeholder="Buscar...">
         </ion-searchbar>
         <ion-list class="currency-list">
           <ion-item
@@ -51,7 +61,7 @@
             (click)="seleccionarMoneda(currency)"
             button
           >
-            {{currency.name}}
+            {{currency.name}} - {{currency.id ?? currency.code}}
           </ion-item>
         </ion-list>
       </div>
@@ -61,7 +71,20 @@
         <ion-label>A:</ion-label>
         <ion-button
           class="seleccionadorBtn"
-          *ngIf="!toType"
+          expand="block"
+          (click)="seleccionarTipo('favoritosMonedas', 'to')"
+          ><ion-icon name="star" slot="start"></ion-icon>Monedas</ion-button
+        >
+        <ion-button
+          class="seleccionadorBtn"
+          expand="block"
+          (click)="seleccionarTipo('favoritosCryptos', 'to')"
+        >
+          <ion-icon name="star" slot="start"></ion-icon>
+          Cryptos
+        </ion-button>
+        <ion-button
+          class="seleccionadorBtn"
           expand="block"
           (click)="seleccionarTipo('monedas', 'to')"
         >
@@ -69,30 +92,21 @@
         </ion-button>
         <ion-button
           class="seleccionadorBtn"
-          *ngIf="!toType"
           expand="block"
           (click)="seleccionarTipo('cryptos', 'to')"
         >
           Criptomonedas
         </ion-button>
         <div *ngIf="toCurrency" class="selected-currency">
-          <span>{{toCurrency.name}}</span>
-          <ion-button
-            class="cancelarBtn"
-            fill="clear"
-            (click)="limpiarSeleccion('to')"
+          <span class="parSeleccionado"
+            >{{toCurrency.name}} - {{toCurrency.id ?? toCurrency.code}}</span
           >
-            <ion-icon name="close-circle"></ion-icon>
-          </ion-button>
         </div>
       </ion-item>
 
       <!-- Búsqueda y lista "A:" -->
       <div *ngIf="showToSearch" class="search-container">
-        <ion-searchbar
-          (ionInput)="buscar($event)"
-          placeholder="Buscar moneda..."
-        >
+        <ion-searchbar (ionInput)="buscar($event)" placeholder="Buscar...">
         </ion-searchbar>
         <ion-list class="currency-list">
           <ion-item
@@ -100,7 +114,7 @@
             (click)="seleccionarMoneda(currency)"
             button
           >
-            {{currency.name}}
+            {{currency.name}} - {{currency.id ?? currency.code}}
           </ion-item>
         </ion-list>
       </div>
@@ -112,8 +126,9 @@
       class="conversion-result"
     >
       <ion-card-content>
-        {{amount}} {{fromCurrency.name}} = {{conversionResult | number:'1.0-8'}}
-        {{toCurrency.name}}
+        $ {{amount}} {{fromCurrency.name}} - {{fromCurrency.id ??
+        fromCurrency.code}} = $ {{conversionResult | number:'1.0-8'}}
+        {{toCurrency.name}} - {{toCurrency.id ?? toCurrency.code}}
       </ion-card-content>
     </ion-card>
 
@@ -130,12 +145,14 @@
           <ion-button
             *ngFor="let button of calculatorButtons"
             (click)="handleCalculatorInput(button.value)"
-            color="warning"
           >
             {{button.display}}
           </ion-button>
         </div>
       </div>
     </ion-content>
+    <ion-button class="btnDescargar" (click)="descargarPdf()"
+      >Descargar comprobante</ion-button
+    >
   </ion-content>
 </ion-content>

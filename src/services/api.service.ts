@@ -23,18 +23,27 @@ export class ApiService {
   }
 
   obtenerPrecioCompra(moneda: string) {
-    const url = `https://api.coinbase.com/v2/prices/${moneda}-USD/buy`;
-    return this.http.get(url);
+    return this.http.get(
+      `https://api.coinbase.com/v2/prices/${moneda}-USD/buy`
+    );
   }
 
   obtenerPrecioVenta(moneda: string) {
-    const url = `https://api.coinbase.com/v2/prices/${moneda}-USD/sell`;
-    return this.http.get(url);
+    return this.http.get(
+      `https://api.coinbase.com/v2/prices/${moneda}-USD/sell`
+    );
   }
 
   obtenerPrecioSpot(moneda: string) {
-    const url = `https://api.coinbase.com/v2/prices/${moneda}-USD/spot`;
-    return this.http.get(url);
+    return this.http.get(
+      `https://api.coinbase.com/v2/prices/${moneda}-USD/spot`
+    );
+  }
+
+  obtenerPreciosConversion(fromId: string, toId: string) {
+    return this.http.get(
+      `https://api.coinbase.com/v2/prices/${fromId}-${toId}/spot`
+    );
   }
 
   // Método para gestionar favoritos con localStorage
@@ -42,25 +51,19 @@ export class ApiService {
     const key = tipo === 'moneda' ? 'favoritosMonedas' : 'favoritosCryptos';
     const favoritos = this.obtenerFavoritos(tipo);
 
-    // Determinar el identificador correcto según el tipo
     const id = tipo === 'moneda' ? item.id : item.code;
-
-    // Verificar si el ítem ya es favorito
     const index = favoritos.findIndex(
       (fav: any) => (tipo === 'moneda' ? fav.id : fav.code) === id
     );
 
     if (index > -1) {
-      // Si ya es favorito, eliminarlo
-      favoritos.splice(index, 1);
+      favoritos.splice(index, 1); // Si ya es favorito, eliminarlo
     } else {
-      // Si no es favorito, agregarlo
-      favoritos.push({ ...item });
+      favoritos.push({ ...item }); // Si no es favorito, agregarlo
     }
 
-    // Guardar la lista actualizada de favoritos
     localStorage.setItem(key, JSON.stringify(favoritos));
-    this.actualizarFavoritos(); // Actualizar la lista de favoritos en el BehaviorSubject
+    this.actualizarFavoritos(); // Emitir el cambio
   }
 
   private actualizarFavoritos() {

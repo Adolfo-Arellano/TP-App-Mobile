@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 // Definir tipo para los códigos de error
-type FirebaseAuthError = 
+type FirebaseAuthError =
   | 'auth/invalid-credential'
   | 'auth/wrong-password'
   | 'auth/user-not-found'
@@ -57,7 +57,6 @@ export class LoginPage {
     this.clearFields();
   }
 
-  
   private clearFields() {
     if (!this.rememberEmail) {
       this.email = '';
@@ -71,7 +70,7 @@ export class LoginPage {
     const alert = await this.alertController.create({
       header: header,
       message: message,
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   }
@@ -80,7 +79,7 @@ export class LoginPage {
     const toast = await this.toastController.create({
       message: message,
       duration: 2000,
-      position: 'top'
+      position: 'top',
     });
     toast.present();
   }
@@ -96,37 +95,56 @@ export class LoginPage {
       'auth/wrong-password': 'Credenciales incorrectas',
       'auth/user-not-found': 'No existe una cuenta con este correo electrónico',
       'auth/invalid-email': 'El correo electrónico no es válido',
-      'auth/too-many-requests': 'Demasiados intentos fallidos. Por favor, intente más tarde',
+      'auth/too-many-requests':
+        'Demasiados intentos fallidos. Por favor, intente más tarde',
       'auth/user-disabled': 'Esta cuenta ha sido deshabilitada',
-      'auth/operation-not-allowed': 'El inicio de sesión está temporalmente deshabilitado',
-      'auth/network-request-failed': 'Error de conexión. Verifica tu conexión a internet'
+      'auth/operation-not-allowed':
+        'El inicio de sesión está temporalmente deshabilitado',
+      'auth/network-request-failed':
+        'Error de conexión. Verifica tu conexión a internet',
     };
-    return errorMessages[errorCode] || 'Error al iniciar sesión. Por favor, verifica tus credenciales';
+    return (
+      errorMessages[errorCode] ||
+      'Error al iniciar sesión. Por favor, verifica tus credenciales'
+    );
   }
 
   private getSignUpErrorMessage(errorCode: FirebaseAuthError): string {
     const errorMessages: Record<string, string> = {
       'auth/email-already-in-use': 'Este correo electrónico ya está registrado',
       'auth/invalid-email': 'El formato del correo electrónico no es válido',
-      'auth/operation-not-allowed': 'El registro está temporalmente deshabilitado',
+      'auth/operation-not-allowed':
+        'El registro está temporalmente deshabilitado',
       'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres',
-      'auth/network-request-failed': 'Error de conexión. Verifica tu conexión a internet',
-      'auth/invalid-credential': 'Las credenciales proporcionadas no son válidas',
-      'auth/too-many-requests': 'Demasiados intentos. Por favor, intente más tarde'
+      'auth/network-request-failed':
+        'Error de conexión. Verifica tu conexión a internet',
+      'auth/invalid-credential':
+        'Las credenciales proporcionadas no son válidas',
+      'auth/too-many-requests':
+        'Demasiados intentos. Por favor, intente más tarde',
     };
-    return errorMessages[errorCode] || 'Error en el registro. Por favor, intente nuevamente';
+    return (
+      errorMessages[errorCode] ||
+      'Error en el registro. Por favor, intente nuevamente'
+    );
   }
 
   async onSignIn() {
     // Validar el email (primera prioridad)
     if (!this.email || this.email.trim() === '') {
-      await this.presentAlert('Error', 'Por favor, ingrese su correo electrónico');
+      await this.presentAlert(
+        'Error',
+        'Por favor, ingrese su correo electrónico'
+      );
       return;
     }
 
     // Validar formato del email
     if (!this.validateEmail(this.email)) {
-      await this.presentAlert('Error', 'Por favor, ingrese un correo electrónico válido');
+      await this.presentAlert(
+        'Error',
+        'Por favor, ingrese un correo electrónico válido'
+      );
       return;
     }
 
@@ -136,7 +154,10 @@ export class LoginPage {
       return;
     }
     try {
-      const result = await this.afAuth.signInWithEmailAndPassword(this.email, this.password);
+      const result = await this.afAuth.signInWithEmailAndPassword(
+        this.email,
+        this.password
+      );
 
       // Manejar el recordar email
       if (this.rememberEmail) {
@@ -148,6 +169,7 @@ export class LoginPage {
       if (result.user) {
         await this.presentToast(`Bienvenido ${result.user.email}`);
       }
+      localStorage.setItem('tab', JSON.stringify(1));
       this.router.navigateByUrl('/tabs/tab2');
     } catch (error: any) {
       console.error('Login error:', error);
@@ -159,13 +181,19 @@ export class LoginPage {
   async onSignUp() {
     // Validar el email (primera prioridad)
     if (!this.email || this.email.trim() === '') {
-      await this.presentAlert('Error', 'Por favor, ingrese su correo electrónico');
+      await this.presentAlert(
+        'Error',
+        'Por favor, ingrese su correo electrónico'
+      );
       return;
     }
 
     // Validar formato del email
     if (!this.validateEmail(this.email)) {
-      await this.presentAlert('Error', 'Por favor, ingrese un correo electrónico válido');
+      await this.presentAlert(
+        'Error',
+        'Por favor, ingrese un correo electrónico válido'
+      );
       return;
     }
 
@@ -177,7 +205,10 @@ export class LoginPage {
 
     // Validar longitud de la contraseña
     if (this.password2.length < 6) {
-      await this.presentAlert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      await this.presentAlert(
+        'Error',
+        'La contraseña debe tener al menos 6 caracteres'
+      );
       return;
     }
 
@@ -192,11 +223,17 @@ export class LoginPage {
       await this.presentAlert('Error', 'Las contraseñas no coinciden');
       return;
     }
-    
+
     try {
-      const result = await this.afAuth.createUserWithEmailAndPassword(this.email, this.password2);
+      const result = await this.afAuth.createUserWithEmailAndPassword(
+        this.email,
+        this.password2
+      );
       console.log('Sign Up successful');
-      await this.presentAlert('Registro Exitoso', 'Se ha registrado correctamente');
+      await this.presentAlert(
+        'Registro Exitoso',
+        'Se ha registrado correctamente'
+      );
       this.clearFields();
       this.toggleSignIn();
     } catch (error: any) {
