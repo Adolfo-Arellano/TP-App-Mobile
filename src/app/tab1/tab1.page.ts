@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AlertController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AuthService } from 'src/services/auth.service';
 
 // Definir tipo para los códigos de error
 type FirebaseAuthError = 
@@ -37,7 +38,7 @@ export class LoginPage {
     private alertController: AlertController,
     private toastController: ToastController,
     private router: Router,
-    private afAuth: AngularFireAuth
+    private authService: AuthService
   ) {
     // Verificar si hay un email guardado al iniciar
     const savedEmail = localStorage.getItem('rememberedEmail');
@@ -136,7 +137,8 @@ export class LoginPage {
       return;
     }
     try {
-      const result = await this.afAuth.signInWithEmailAndPassword(this.email, this.password);
+      // Usar el servicio de autenticación en lugar de afAuth directamente
+      const result = await this.authService.signIn(this.email, this.password);
 
       // Manejar el recordar email
       if (this.rememberEmail) {
@@ -149,7 +151,6 @@ export class LoginPage {
         await this.presentToast(`Bienvenido ${result.user.email}`);
       }
     } catch (error: any) {
-      console.error('Login error:', error);
       const errorMessage = this.getLoginErrorMessage(error.code);
       await this.presentAlert('Error de autenticación', errorMessage);
     }
@@ -193,13 +194,11 @@ export class LoginPage {
     }
     
     try {
-      const result = await this.afAuth.createUserWithEmailAndPassword(this.email, this.password2);
-      console.log('Sign Up successful');
+      const result = await this.authService.signUp(this.email, this.password2);
       await this.presentAlert('Registro Exitoso', 'Se ha registrado correctamente');
       this.clearFields();
       this.toggleSignIn();
     } catch (error: any) {
-      console.error('Sign Up error:', error);
       const errorMessage = this.getSignUpErrorMessage(error.code);
       await this.presentAlert('Error en el registro', errorMessage);
     }

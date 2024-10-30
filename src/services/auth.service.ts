@@ -4,6 +4,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import firebase from 'firebase/compat/app';
 
 interface UserProfile {
   displayName?: string;
@@ -12,6 +13,7 @@ interface UserProfile {
   location?: string;
   bio?: string;
   photoURL?: string;
+  email?: string;
 }
 
 @Injectable({
@@ -173,5 +175,44 @@ export class AuthService {
       }
     }
     return null;
+  }
+
+  async linkTwitter() {
+    try {
+      const provider = new firebase.auth.TwitterAuthProvider();
+      const currentUser = await this.getCurrentUser();
+      if (currentUser) {
+        await currentUser.linkWithPopup(provider);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error linking Twitter:', error);
+      throw error;
+    }
+  }
+
+  async unlinkTwitter() {
+    try {
+      const currentUser = await this.getCurrentUser();
+      if (currentUser) {
+        await currentUser.unlink('twitter.com');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error unlinking Twitter:', error);
+      throw error;
+    }
+  }
+
+  isTwitterLinked(): boolean {
+    const currentUser = firebase.auth().currentUser;
+    if (currentUser && currentUser.providerData) {
+      return currentUser.providerData.some(
+        provider => provider?.providerId === 'twitter.com'
+      );
+    }
+    return false;
   }
 }

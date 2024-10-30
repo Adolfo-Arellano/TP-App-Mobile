@@ -24,6 +24,7 @@ export class Tab4Page implements OnInit {
 
   ngOnInit() {
     this.loadUserProfile();
+    this.checkTwitterStatus();
   }
 
   loadUserProfile() {
@@ -287,6 +288,60 @@ export class Tab4Page implements OnInit {
     };
     
     input.click();
+  }
+
+  async checkTwitterStatus() {
+    this.isTwitterLinked = this.authService.isTwitterLinked();
+  }
+  
+  async handleTwitterConnection() {
+    try {
+      if (this.isTwitterLinked) {
+        // Mostrar confirmación antes de desvincular
+        const alert = await this.alertController.create({
+          header: 'Confirmar',
+          message: '¿Estás seguro que deseas desvincular tu cuenta de Twitter?',
+          buttons: [
+            {
+              text: 'Cancelar',
+              role: 'cancel'
+            },
+            {
+              text: 'Desvincular',
+              handler: async () => {
+                await this.authService.unlinkTwitter();
+                await this.presentToast('Cuenta de Twitter desvinculada correctamente');
+                this.checkTwitterStatus();
+              }
+            }
+          ]
+        });
+        await alert.present();
+      } else {
+        // Conectar cuenta
+        await this.authService.linkTwitter();
+        await this.presentToast('Cuenta de Twitter conectada correctamente');
+        this.checkTwitterStatus();
+      }
+    } catch (error: any) {
+      console.error('Error con Twitter:', error);
+      let errorMessage = 'Error al procesar la conexión con Twitter';
+      
+      if (error.code === 'auth/provider-already-linked') {
+        errorMessage = 'Esta cuenta de Twitter ya está vinculada a otro usuario';
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        errorMessage = 'Operación cancelada por el usuario';
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'El navegador bloqueó la ventana emergente. Por favor, permite las ventanas emergentes para este sitio.';
+      }
+      
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: errorMessage,
+        buttons: ['OK']
+      });
+      await alert.present();
+    }
   }
 
   async logout() {
