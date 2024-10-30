@@ -1,150 +1,213 @@
 ion-content {
   --background: rgb(20, 20, 20);
-}
-
-ion-item {
-  --background: gray;
-  --color: rgb(20, 20, 20);
-  margin-bottom: 8px;
+  --padding-bottom: 60px;
 }
 
 .general {
   --background: none;
-  background-image: url("../../../assets/img/calculador-bg.jpg");
+  background-image: url("../../../assets/img/calculador-bg2.jpg");
   background-position: center;
-  --brightness: 0.7;
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+  }
+}
+
+.conversor-title {
+  text-align: center;
+  padding: 16px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  position: relative;
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .ion-padding {
-  --ripple-color: transparent;
-  --background: rgba(0, 0, 0, 0.5);
-}
-
-ion-item {
-  --ripple-color: transparent;
-  --background: rgba(0, 0, 0, 0.9);
-  font-weight: bolder;
-  color: white;
-}
-
-ion-toolbar {
-  --ripple-color: transparent;
-  --background: rgba(0, 0, 0, 0.9);
-  font-weight: bolder;
-  color: white;
-}
-
-.selected-currency {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 8px;
-  --ripple-color: transparent;
-  --background: rgba(0, 0, 0, 0.5);
-  font-weight: bolder;
-  margin-left: -20rem;
-}
-
-.search-container {
   position: relative;
-  z-index: 1000;
+  padding: 16px;
+}
 
-  .currency-list {
-    max-height: 10rem;
-    overflow: auto;
-    background: rgba(20, 20, 20, 0.5);
-    border-radius: 1rem;
-    margin-top: 8px;
+// Sección de selección
+.selection-section {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.spacer {
+  height: 24px;
+  background: transparent;
+}
+
+.selector-group {
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
   }
 }
 
-.seleccionadorBtn {
-  --background: #ffd000;
+.label-text {
+  color: white;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
-.cancelarBtn {
-  color: red;
-  ion-icon {
-    width: 1.5rem;
-    height: 1.5rem;
+.button-row {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
-ion-searchbar {
-  --background: rgb(188, 188, 188);
+.currency-btn {
+  --background: #ffd700;
   --color: black;
-  --placeholder-color: black;
+  --border-radius: 4px;
+  --padding-top: 4px;
+  --padding-bottom: 4px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  margin: 0;
+  height: 24px;
+  font-size: 12px;
+  text-transform: none;
+  flex-shrink: 0;
+}
+
+// Sección de calculadora
+.calculator-section {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 24px;
 }
 
 .conversion-result {
-  margin: 16px 0;
+  color: white;
+  padding: 12px;
+  margin-bottom: 16px;
+  font-size: 16px;
   text-align: center;
-  font-size: 1.2em;
-
-  ion-card-content {
-    padding: 16px;
-  }
-}
-
-.calculadora {
-  --ripple-color: transparent;
-  --background: rgba(0, 0, 0, 0.7);
-  height: 35rem;
-}
-
-.calculator-container {
-  margin-top: 20px;
-  padding: 15px;
 }
 
 .calculator-display {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.9);
   color: black;
-  font-size: 2rem;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 4px;
   text-align: right;
-  margin-bottom: 2rem;
-  border-radius: 8px;
-  padding: 10px;
+  font-size: 24px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .calculator-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  font-weight: bolder;
+  gap: 8px;
+  margin-bottom: 24px;
 
-  ion-button {
-    font-size: 1.3rem;
+  .calc-button {
     --background: #ffd700;
     --color: black;
+    margin: 0;
+    height: 48px;
+    width: 100%;
+    font-size: 20px;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    
+    &::part(native) {
+      border: 2px solid rgba(0, 0, 0, 0.1);
+    }
   }
 }
 
-ion-card {
-  --background: rgba(0, 0, 0, 0.7);
-  --color: white;
+.search-container {
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 16px 0;
 
-  ion-card-content {
-    font-size: 1.3rem;
+  ion-searchbar {
+    --background: rgb(188, 188, 188);
+    --color: black;
+    --placeholder-color: black;
+    --border-radius: 4px;
+    padding: 0;
+    margin: 0;
+  }
+
+  ion-list {
+    background: transparent;
+    padding: 0;
+    margin-top: 8px;
+    max-height: 160px; // Altura para mostrar ~4 elementos
+    overflow-y: auto;
+    
+    // Estilo del scrollbar
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+    }
+  }
+
+  ion-item {
+    --background: transparent;
+    --color: white;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --min-height: 36px;
+    font-size: 14px;
   }
 }
 
 .btnDescargar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: 4rem;
-  padding-bottom: 6rem;
-  width: 12rem;
-  height: 2rem;
-  margin: 0 auto;
   --background: #ffd700;
+  --color: black;
+  --border-radius: 4px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  margin: 0;
+  font-weight: bold;
+  font-size: 14px;
 }
 
-.parSeleccionado {
-  --color: white;
-  width: 10rem;
-  margin-top: 5rem;
-  margin-right: -25rem;
-  font-weight: bolder;
+.selected-currency {
+  color: white;
+  padding: 8px;
+  margin-top: 8px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }

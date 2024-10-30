@@ -1,9 +1,31 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from 'src/services/api.service';
+import { ApiService, Currency } from 'src/services/api.service';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 
 (<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
+
+interface ConversionResponse {
+  data: {
+    amount: string;
+  };
+}
+
+interface PdfStyles {
+  [key: string]: {
+    fontSize?: number;
+    bold?: boolean;
+    margin?: [number, number, number, number];
+  };
+}
+
+interface PdfDefinition {
+  content: Array<{
+    text: string;
+    style?: string;
+  }>;
+  styles: PdfStyles;
+}
 
 @Component({
   selector: 'app-tab3',
@@ -11,17 +33,17 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts';
   styleUrls: ['./tab3.page.scss'],
 })
 export class Tab3Page implements OnInit {
-  monedas: any[] = [];
-  cryptos: any[] = [];
-  filteredCurrencies: any[] = [];
-  favoritosMonedas: any[] = [];
-  favoritosCryptos: any[] = [];
+  monedas: Currency[] = [];
+  cryptos: Currency[] = [];
+  filteredCurrencies: Currency[] = [];
+  favoritosMonedas: Currency[] = [];
+  favoritosCryptos: Currency[] = [];
   archivoPdf: any;
 
   fromType: string = '';
   toType: string = '';
-  fromCurrency: any = null;
-  toCurrency: any = null;
+  fromCurrency: Currency | null = null;
+  toCurrency: Currency | null = null;
   amount: string = '';
   conversionResult: number = 0;
   searchTerm: string = '';
@@ -49,41 +71,56 @@ export class Tab3Page implements OnInit {
 
   constructor(public apiService: ApiService) {}
 
-  ngOnInit() {
-    this.consumirApi();
-    this.consumirApiCrypto();
-    this.consumirFavoritosMonedas();
-    this.consumirFavoritosCryptos();
+  async ngOnInit() {
+    try {
+      await Promise.all([
+        this.consumirApi(),
+        this.consumirApiCrypto()
+      ]);
+      this.cargarFavoritos();
+    } catch (error) {
+      console.error('Error al inicializar:', error);
+    }
   }
 
-  consumirApi() {
-    this.apiService.obtenerApi().subscribe((moneda: any) => {
-      this.monedas = this.ordenarAlfabeticamente(moneda.data);
-    });
-  }
-
-  consumirApiCrypto() {
-    this.apiService.obtenerApiCrypto().subscribe((crypto: any) => {
-      this.cryptos = this.ordenarAlfabeticamente(crypto.data);
-    });
-  }
-
-  consumirFavoritosMonedas() {
+  cargarFavoritos() {
     this.favoritosMonedas = this.apiService.obtenerFavoritos('moneda');
-    this.favoritosMonedas = this.ordenarAlfabeticamente(this.favoritosMonedas);
-  }
-
-  consumirFavoritosCryptos() {
     this.favoritosCryptos = this.apiService.obtenerFavoritos('crypto');
-    this.favoritosCryptos = this.ordenarAlfabeticamente(this.favoritosCryptos);
+    console.log('Favoritos cargados:', {
+      monedas: this.favoritosMonedas,
+      cryptos: this.favoritosCryptos
+    });
   }
 
-  ordenarAlfabeticamente(lista: any[]): any[] {
-    return lista.sort((a, b) => a.name.localeCompare(b.name));
+  async consumirApi() {
+    try {
+      const response = await this.apiService.obtenerApi().toPromise();
+      if (response?.data) {
+        this.monedas = this.ordenarAlfabeticamente(response.data);
+      }
+    } catch (error) {
+      console.error('Error al obtener monedas:', error);
+    }
+  }
+
+  async consumirApiCrypto() {
+    try {
+      const response = await this.apiService.obtenerApiCrypto().toPromise();
+      if (response?.data) {
+        this.cryptos = this.ordenarAlfabeticamente(response.data);
+      }
+    } catch (error) {
+      console.error('Error al obtener cryptos:', error);
+    }
+  }
+
+  ordenarAlfabeticamente(lista: Currency[]): Currency[] {
+    return [...lista].sort((a, b) => a.name.localeCompare(b.name));
   }
 
   seleccionarTipo(tipo: string, origen: 'from' | 'to') {
     this.searchTerm = '';
+    
     if (origen === 'from') {
       this.fromType = tipo;
       this.fromCurrency = null;
@@ -99,41 +136,42 @@ export class Tab3Page implements OnInit {
       this.isSelectingFrom = false;
       this.showFromSearch = false;
     }
+
+    this.cargarFavoritos();
     this.actualizarListaFiltrada();
   }
 
   actualizarListaFiltrada() {
     const tipo = this.isSelectingFrom ? this.fromType : this.toType;
-    let lista: any = [];
-    if (
-      this.fromType == 'favoritosMonedas' ||
-      this.fromType == 'favoritosCryptos'
-    ) {
-      lista =
-        tipo === 'favoritosMonedas'
-          ? this.favoritosMonedas
-          : this.favoritosCryptos;
-    } else {
-      lista = tipo === 'monedas' ? this.monedas : this.cryptos;
+    let lista: Currency[] = [];
+
+    switch (tipo) {
+      case 'favoritosMonedas':
+        lista = [...this.favoritosMonedas];
+        break;
+      case 'favoritosCryptos':
+        lista = [...this.favoritosCryptos];
+        break;
+      case 'monedas':
+        lista = [...this.monedas];
+        break;
+      case 'cryptos':
+        lista = [...this.cryptos];
+        break;
     }
+
     if (this.searchTerm) {
-      lista = lista.filter((item: any) => {
-        let results = [];
-
-        if (tipo == 'monedas' || tipo == 'favoritosMonedas') {
-          results =
-            item.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-            item.id.toLowerCase().includes(this.searchTerm.toLowerCase());
-        } else {
-          results =
-            item.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-            item.code.toLowerCase().includes(this.searchTerm.toLowerCase());
-        }
-
-        return results;
+      const searchLower = this.searchTerm.toLowerCase();
+      lista = lista.filter((item: Currency) => {
+        if (!item) return false;
+        const nameMatch = item.name.toLowerCase().includes(searchLower);
+        const idMatch = ((item.id || item.code) || '').toLowerCase().includes(searchLower);
+        return nameMatch || idMatch;
       });
     }
+
     this.filteredCurrencies = lista;
+    console.log('Lista filtrada:', this.filteredCurrencies);
   }
 
   buscar(evento: any) {
@@ -141,7 +179,7 @@ export class Tab3Page implements OnInit {
     this.actualizarListaFiltrada();
   }
 
-  seleccionarMoneda(currency: any) {
+  seleccionarMoneda(currency: Currency) {
     if (this.isSelectingFrom) {
       this.fromCurrency = currency;
       this.showFromSearch = false;
@@ -151,7 +189,46 @@ export class Tab3Page implements OnInit {
       this.showToSearch = false;
       this.isSelectingTo = false;
     }
+    
     this.searchTerm = '';
+    if (this.fromCurrency && this.toCurrency && this.amount) {
+      this.convertir();
+    }
+  }
+
+  async convertir() {
+    if (!this.fromCurrency || !this.toCurrency || !this.amount) {
+      this.conversionResult = 0;
+      return;
+    }
+
+    try {
+      const parsedAmount = parseFloat(this.amount.replace(',', '.'));
+      if (isNaN(parsedAmount)) {
+        this.conversionResult = 0;
+        return;
+      }
+
+      const fromId = this.fromCurrency.id || this.fromCurrency.code;
+      const toId = this.toCurrency.id || this.toCurrency.code;
+
+      if (!fromId || !toId) {
+        console.error('IDs de moneda no válidos');
+        return;
+      }
+
+      const response = await this.apiService.obtenerPreciosConversion(fromId, toId).toPromise();
+      if (response?.data?.amount) {
+        const conversion = parsedAmount * parseFloat(response.data.amount);
+        this.conversionResult = parseFloat(conversion.toFixed(3));
+      } else {
+        console.error('Respuesta de conversión inválida:', response);
+        this.conversionResult = 0;
+      }
+    } catch (error) {
+      console.error('Error en la conversión:', error);
+      this.conversionResult = 0;
+    }
   }
 
   handleCalculatorInput(value: string | number) {
@@ -167,17 +244,21 @@ export class Tab3Page implements OnInit {
   }
 
   agregarNumero(number: string) {
-    // Evitar que haya ceros iniciales seguidos de otros números (a menos que haya una coma después)
     if (number === '0' && this.amount === '0') return;
-
-    // Concatenar el número
-    this.amount += number;
+    
+    if (this.amount === '0') {
+      this.amount = number;
+    } else {
+      this.amount += number;
+    }
+    
     this.convertir();
   }
 
   agregarComa() {
-    // Evitar múltiples comas en el mismo número
-    if (!this.amount.includes(',')) {
+    if (!this.amount) {
+      this.amount = '0,';
+    } else if (!this.amount.includes(',')) {
       this.amount += ',';
     }
   }
@@ -196,36 +277,6 @@ export class Tab3Page implements OnInit {
     }
   }
 
-  async convertir() {
-    if (!this.fromCurrency || !this.toCurrency || !this.amount) return;
-
-    try {
-      // Reemplazar la coma por un punto antes de convertir
-      const parsedAmount = parseFloat(this.amount.replace(',', '.'));
-      if (isNaN(parsedAmount)) {
-        this.conversionResult = 0;
-        return;
-      }
-
-      const fromId =
-        this.fromType === 'monedas'
-          ? this.fromCurrency.id
-          : this.fromCurrency.code;
-      const toId =
-        this.toType === 'monedas' ? this.toCurrency.id : this.toCurrency.code;
-
-      this.apiService
-        .obtenerPreciosConversion(fromId, toId)
-        .subscribe((response: any) => {
-          const conversion = parsedAmount * parseFloat(response.data.amount);
-          // Limitar a 3 decimales con toFixed y convertir a número
-          this.conversionResult = parseFloat(conversion.toFixed(3));
-        });
-    } catch (error) {
-      console.error('Error en la conversión:', error);
-    }
-  }
-
   limpiarSeleccion(origen: 'from' | 'to') {
     if (origen === 'from') {
       this.fromType = '';
@@ -239,38 +290,54 @@ export class Tab3Page implements OnInit {
       this.isSelectingTo = false;
     }
     this.conversionResult = 0;
-    this.amount = '';
   }
 
   descargarPdf() {
-    var pdf = {
+    if (!this.fromCurrency || !this.toCurrency || !this.amount || !this.conversionResult) {
+      console.error('Faltan datos para generar el PDF');
+      return;
+    }
+
+    const pdfDefinition: PdfDefinition = {
       content: [
+        { text: 'CryptoApp', style: 'header' },
         { text: 'Comprobante de conversión', style: 'header' },
         {
-          text: `De: ${this.fromCurrency.name} (${
+          text: `De: ${this.fromCurrency.name} - ${
             this.fromCurrency.id ?? this.fromCurrency.code
-          })`,
+          }`,
         },
         {
-          text: `A: ${this.toCurrency.name} (${
-            this.toCurrency.id ?? this.toCurrency.code
-          })`,
-        },
-        {
-          text: `Cantidad: ${this.amount} (${
-            this.fromCurrency.id ?? this.toCurrency.code
-          })`,
-        },
-        {
-          text: `Resultado: ${this.conversionResult} ${
+          text: `A: ${this.toCurrency.name} - ${
             this.toCurrency.id ?? this.toCurrency.code
           }`,
         },
+        {
+          text: `Cantidad: $ ${this.amount} ${this.fromCurrency.name} - ${
+            this.fromCurrency.id ?? this.toCurrency.code
+          }`,
+        },
+        {
+          text: `Resultado: $ ${this.conversionResult} ${
+            this.toCurrency.name
+          } - ${this.toCurrency.id ?? this.toCurrency.code}`,
+        },
+        { text: '¡Gracias por usar CryptoApp!' },
       ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          margin: [0, 0, 0, 10]
+        }
+      }
     };
-    this.archivoPdf = pdfMake.createPdf(pdf);
-    console.log('Archivo PDF creado');
-    this.archivoPdf.download('comprobanteConversion.pdf');
-    console.log('Archivo PDF descargado');
+
+    try {
+      this.archivoPdf = pdfMake.createPdf(pdfDefinition);
+      this.archivoPdf.download('comprobanteConversion.pdf');
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
+    }
   }
 }
