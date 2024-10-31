@@ -17,14 +17,16 @@
 <ion-content>
   <ion-searchbar
     *ngIf="sliderTipo === 'monedas'"
-    (ionChange)="buscador($event)"
-    placeholder="Buscar moneda...">
+    (ionInput)="buscador($event)"
+    placeholder="Buscar moneda..."
+  >
   </ion-searchbar>
 
   <ion-searchbar
     *ngIf="sliderTipo === 'cryptos'"
-    (ionChange)="buscadorCrypto($event)"
-    placeholder="Buscar crypto...">
+    (ionInput)="buscadorCrypto($event)"
+    placeholder="Buscar crypto..."
+  >
   </ion-searchbar>
 
   <div *ngIf="sliderTipo === 'monedas'" class="lista-contenedor">
@@ -39,7 +41,8 @@
         </ion-button>
         <ion-icon
           [name]="moneda.esFavorito ? 'star' : 'star-outline'"
-          (click)="SeleccionarFavorito(moneda)">
+          (click)="SeleccionarFavorito(moneda)"
+        >
         </ion-icon>
       </div>
     </div>
@@ -57,7 +60,8 @@
         </ion-button>
         <ion-icon
           [name]="crypto.esFavorito ? 'star' : 'star-outline'"
-          (click)="SeleccionarFavoritosCrypto(crypto)">
+          (click)="SeleccionarFavoritosCrypto(crypto)"
+        >
         </ion-icon>
       </div>
     </div>
