@@ -5,7 +5,7 @@ ion-content {
 
 .general {
   --background: none;
-  background-image: url("../../../assets/img/calculador-bg2.jpg");
+  background-image: url("../../assets/img/calculador-bg2.jpg");
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -13,7 +13,7 @@ ion-content {
   position: relative;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -72,7 +72,7 @@ ion-content {
   gap: 4px;
   overflow-x: auto;
   padding-bottom: 4px;
-  
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -138,7 +138,7 @@ ion-content {
     font-size: 20px;
     --border-radius: 8px;
     --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    
+
     &::part(native) {
       border: 2px solid rgba(0, 0, 0, 0.1);
     }
@@ -166,17 +166,17 @@ ion-content {
     margin-top: 8px;
     max-height: 160px; // Altura para mostrar ~4 elementos
     overflow-y: auto;
-    
+
     // Estilo del scrollbar
     &::-webkit-scrollbar {
       width: 4px;
     }
-    
+
     &::-webkit-scrollbar-track {
       background: rgba(255, 255, 255, 0.1);
       border-radius: 2px;
     }
-    
+
     &::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.3);
       border-radius: 2px;

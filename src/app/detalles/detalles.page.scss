@@ -14,6 +14,7 @@ ion-toolbar {
 ion-title {
   font-weight: bolder;
   color: white;
+  text-align: center;
 }
 
 ion-card-title {
@@ -120,7 +121,7 @@ ion-card-content {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("../../../assets/img/divisas-bg.jpg");
+  background-image: url("../../assets/img/divisas-bg.jpg");
   background-size: cover;
   background-position: center;
   opacity: 1;
@@ -135,7 +136,7 @@ ion-card-content {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("../../../assets/img/crypto-bg.jpg");
+  background-image: url("../../assets/img/crypto-bg.jpg");
   background-size: cover;
   background-position: center;
   opacity: 1;

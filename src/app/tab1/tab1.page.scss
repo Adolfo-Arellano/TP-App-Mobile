@@ -26,7 +26,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("../../../assets/img/crypto-background.jpg");
+    background-image: url("../../assets/img/crypto-background.jpg");
     background-size: cover;
     background-position: center;
     opacity: 0.5;
@@ -131,4 +131,15 @@
   &:hover {
     --background: #e6bc00;
   }
+}
+
+.containerLogo {
+  margin-top: -15rem;
+  margin-bottom: -4rem;
+}
+
+.logo {
+  img: url("../../assets/img/crypto-background.jpg");
+  position: center;
+  size: cover;
 }
