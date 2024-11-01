@@ -1,6 +1,6 @@
 /**
  * Tab3Page Component (Conversion Page)
- * 
+ *
  * Este componente maneja la funcionalidad de conversión entre monedas y criptomonedas.
  * Características principales:
  * - Conversión en tiempo real entre cualquier par de monedas/criptos
@@ -14,7 +14,10 @@ import { ApiService, Currency } from 'src/services/api.service';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
-
+import { PDFDocument } from 'pdf-lib';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import { isPlatform } from '@ionic/angular';
 (<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 
 interface ConversionResponse {
@@ -108,10 +111,6 @@ export class Tab3Page implements OnInit {
   cargarFavoritos() {
     this.favoritosMonedas = this.apiService.obtenerFavoritos('moneda');
     this.favoritosCryptos = this.apiService.obtenerFavoritos('crypto');
-    console.log('Favoritos cargados:', {
-      monedas: this.favoritosMonedas,
-      cryptos: this.favoritosCryptos,
-    });
   }
 
   /**
@@ -214,7 +213,6 @@ export class Tab3Page implements OnInit {
     }
 
     this.filteredCurrencies = lista;
-    console.log('Lista filtrada:', this.filteredCurrencies);
   }
 
   /**
@@ -372,7 +370,7 @@ export class Tab3Page implements OnInit {
   /**
    * Genera y descarga un PDF con el comprobante de la conversión
    */
-  descargarPdf() {
+  descargarPdfnew() {
     if (
       !this.fromCurrency ||
       !this.toCurrency ||
@@ -383,45 +381,124 @@ export class Tab3Page implements OnInit {
       return;
     }
 
-    const pdfComprobante: TDocumentDefinitions = {
-      content: [
-        { text: 'Comprobante de conversión', style: 'header' },
-        {
-          text: `De: ${this.fromCurrency.name} - ${
-            this.fromCurrency.id ?? this.fromCurrency.code
-          }`,
-        },
-        {
-          text: `A: ${this.toCurrency.name} - ${
-            this.toCurrency.id ?? this.toCurrency.code
-          }`,
-        },
-        {
-          text: `Cantidad: $ ${this.amount} ${this.fromCurrency.name} - ${
-            this.fromCurrency.id ?? this.fromCurrency.code
-          }`,
-        },
-        {
-          text: `Resultado: $ ${this.conversionResult} ${
-            this.toCurrency.name
-          } - ${this.toCurrency.id ?? this.toCurrency.code}`,
-        },
-        {
-          text: '¡Gracias por usar CryptoApp!',
-          style: 'header',
-        },
-      ],
-      styles: {
-        header: {
-          fontSize: 18,
-          bold: true,
-          margin: [0, 0, 0, 10],
-        },
+    this.descargarPdf(
+      {
+        name: this.fromCurrency.name,
+        code: this.fromCurrency.id ?? this.fromCurrency.code ?? '',
       },
-    };
-    {
-      this.archivoPdf = pdfMake.createPdf(pdfComprobante);
-      this.archivoPdf.download('comprobanteConversion.pdf');
+      {
+        name: this.toCurrency.name,
+        code: this.toCurrency.id ?? this.toCurrency.code ?? '',
+      },
+      Number(this.amount),
+      this.conversionResult
+    );
+  }
+  // Método para descargar el PDF con la información de la conversión de divisas y compartirlo en móviles
+  async descargarPdf(
+    fromCurrency: { name: string; id?: string; code: string },
+    toCurrency: { name: string; id?: string; code: string },
+    amount: number,
+    conversionResult: number
+  ) {
+    if (!fromCurrency || !toCurrency || !amount || !conversionResult) {
+      console.error('Faltan datos para generar el PDF');
+      return;
     }
+
+    // Crear el PDF
+    const pdfBase64 = await this.createPdf(
+      fromCurrency,
+      toCurrency,
+      amount,
+      conversionResult
+    );
+
+    // Guardar y compartir el PDF
+    if (this.isMobile()) {
+      const writeResult = await Filesystem.writeFile({
+        path: 'comprobanteConversion.pdf',
+        data: pdfBase64,
+        directory: Directory.Documents,
+      });
+
+      // Abre el archivo en móviles usando Share
+      await Share.share({
+        title: 'Comprobante de conversión',
+        text: 'Aquí tienes tu comprobante de conversión.',
+        url: writeResult.uri,
+        dialogTitle: 'Abrir con...',
+      });
+
+      alert('PDF guardado y abierto en tu dispositivo.');
+    } else {
+      // Descargar PDF en computadoras
+      const link = document.createElement('a');
+      link.href = `data:application/pdf;base64,${pdfBase64}`;
+      link.download = 'comprobanteConversion.pdf';
+      link.click();
+    }
+  }
+
+  // Método para crear el PDF con la información de la conversión de divisas
+  async createPdf(
+    fromCurrency: { name: string; id?: string; code: string },
+    toCurrency: { name: string; id?: string; code: string },
+    amount: number,
+    conversionResult: number
+  ) {
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([600, 400]);
+
+    const fontSize = 12;
+    const yOffset = 50;
+
+    page.drawText('Comprobante de conversión', { x: 50, y: 350, size: 18 });
+    page.drawText(
+      `De: ${fromCurrency.name} - ${fromCurrency.id ?? fromCurrency.code}`,
+      { x: 50, y: 300, size: fontSize }
+    );
+    page.drawText(
+      `A: ${toCurrency.name} - ${toCurrency.id ?? toCurrency.code}`,
+      { x: 50, y: 300 - yOffset, size: fontSize }
+    );
+    page.drawText(
+      `Cantidad: $ ${amount} ${fromCurrency.name} - ${
+        fromCurrency.id ?? fromCurrency.code
+      }`,
+      { x: 50, y: 300 - yOffset * 2, size: fontSize }
+    );
+    page.drawText(
+      `Resultado: $ ${conversionResult} ${toCurrency.name} - ${
+        toCurrency.id ?? toCurrency.code
+      }`,
+      { x: 50, y: 300 - yOffset * 3, size: fontSize }
+    );
+    page.drawText('¡Gracias por usar CryptoApp!', {
+      x: 50,
+      y: 300 - yOffset * 5,
+      size: 18,
+    });
+
+    const pdfBytes = await pdfDoc.save();
+    const pdfBase64 = this.arrayBufferToBase64(pdfBytes);
+
+    return pdfBase64;
+  }
+
+  // Método para convertir un ArrayBuffer a base64
+  arrayBufferToBase64(buffer: ArrayBuffer): string {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    bytes.forEach((byte) => (binary += String.fromCharCode(byte)));
+    return btoa(binary);
+  }
+
+  // Método para verificar si el dispositivo
+  isMobile(): boolean {
+    return (
+      isPlatform('hybrid') ||
+      /android|iphone|ipad|ipod/i.test(navigator.userAgent)
+    );
   }
 }
