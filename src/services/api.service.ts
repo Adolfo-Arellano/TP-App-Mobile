@@ -1,3 +1,17 @@
+/**
+ * API Service
+ * 
+ * Este servicio maneja todas las interacciones con la API de Coinbase y la gestión de favoritos.
+ * Funcionalidades principales:
+ * - Obtención de datos de monedas y criptomonedas desde Coinbase
+ * - Consulta de precios (spot, compra, venta)
+ * - Gestión de conversiones entre monedas
+ * - Manejo de favoritos con almacenamiento local
+ * - Sistema de observables para actualización en tiempo real
+ * 
+ * El servicio implementa un patrón Observer utilizando BehaviorSubject para
+ * mantener actualizada la lista de favoritos en toda la aplicación.
+ */
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';

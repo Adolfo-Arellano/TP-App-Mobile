@@ -1,3 +1,23 @@
+/**
+ * Auth Service
+ * 
+ * Este servicio maneja toda la lógica de autenticación y gestión de usuarios.
+ * Funcionalidades principales:
+ * - Autenticación de usuarios (registro, login, logout)
+ * - Gestión de perfil de usuario
+ * - Verificación de email
+ * - Cambio de contraseña
+ * - Integración con redes sociales (Twitter)
+ * - Manejo de sesiones
+ * - Navegación basada en estado de autenticación
+ * 
+ * Utiliza Firebase Authentication para la gestión de usuarios y Firestore
+ * para almacenar datos adicionales del perfil. Implementa un sistema
+ * de navegación automática basado en el estado de autenticación.
+ * 
+ * La interfaz UserProfile define la estructura de datos para la información
+ * adicional del usuario que se almacena en Firestore.
+ */
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
