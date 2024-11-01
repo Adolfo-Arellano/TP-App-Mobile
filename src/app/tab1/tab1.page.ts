@@ -1,3 +1,15 @@
+/**
+ * LoginPage Component
+ * 
+ * Este componente maneja la autenticación de usuarios en la aplicación.
+ * Proporciona funcionalidad para:
+ * - Inicio de sesión de usuarios existentes
+ * - Registro de nuevos usuarios
+ * - Validación de formularios
+ * - Gestión de errores de autenticación
+ * - Recordar email del usuario
+ */
+
 import { Component } from '@angular/core';
 import { AlertController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -24,6 +36,13 @@ type FirebaseAuthError =
   styleUrls: ['./tab1.page.scss'],
 })
 export class LoginPage {
+    /**
+   * Constructor del componente LoginPage
+   * @param alertController - Servicio para mostrar alertas
+   * @param toastController - Servicio para mostrar mensajes toast
+   * @param router - Servicio de navegación
+   * @param authService - Servicio de autenticación
+   */
   isSignIn: boolean = true;
   email: string = '';
   email2: string = '';
@@ -48,17 +67,26 @@ export class LoginPage {
     }
   }
 
+  /**
+   * Cambia la vista al formulario de inicio de sesión y limpia los campos
+   */
   toggleSignIn() {
     this.isSignIn = true;
     this.clearFields();
   }
 
+  /**
+   * Cambia la vista al formulario de registro y limpia los campos
+   */
   toggleSignUp() {
     this.isSignIn = false;
     this.clearFields();
   }
 
-  
+  /**
+   * Limpia los campos del formulario manteniendo el email si está activada la opción de recordar
+   * @private
+   */
   private clearFields() {
     if (!this.rememberEmail) {
       this.email = '';
@@ -68,6 +96,11 @@ export class LoginPage {
     this.repeatPassword = '';
   }
 
+  /**
+   * Muestra una alerta con un mensaje personalizado
+   * @param {string} header - Título de la alerta
+   * @param {string} message - Mensaje a mostrar
+   */
   async presentAlert(header: string, message: string) {
     const alert = await this.alertController.create({
       header: header,
@@ -77,6 +110,10 @@ export class LoginPage {
     await alert.present();
   }
 
+  /**
+   * Muestra un mensaje toast temporal
+   * @param {string} message - Mensaje a mostrar
+   */
   async presentToast(message: string) {
     const toast = await this.toastController.create({
       message: message,
@@ -86,11 +123,22 @@ export class LoginPage {
     toast.present();
   }
 
+  /**
+   * Valida el formato de un email usando una expresión regular
+   * @param {string} email - Email a validar
+   * @returns {boolean} - True si el email es válido
+   */
   validateEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
+  /**
+   * Obtiene el mensaje de error correspondiente para errores de inicio de sesión
+   * @param {FirebaseAuthError} errorCode - Código de error de Firebase
+   * @returns {string} - Mensaje de error traducido
+   * @private
+   */
   private getLoginErrorMessage(errorCode: FirebaseAuthError): string {
     const errorMessages: Record<string, string> = {
       'auth/invalid-credential': 'Credenciales incorrectas',
@@ -105,6 +153,12 @@ export class LoginPage {
     return errorMessages[errorCode] || 'Error al iniciar sesión. Por favor, verifica tus credenciales';
   }
 
+  /**
+   * Obtiene el mensaje de error correspondiente para errores de registro
+   * @param {FirebaseAuthError} errorCode - Código de error de Firebase
+   * @returns {string} - Mensaje de error traducido
+   * @private
+   */
   private getSignUpErrorMessage(errorCode: FirebaseAuthError): string {
     const errorMessages: Record<string, string> = {
       'auth/email-already-in-use': 'Este correo electrónico ya está registrado',
@@ -118,6 +172,10 @@ export class LoginPage {
     return errorMessages[errorCode] || 'Error en el registro. Por favor, intente nuevamente';
   }
 
+  /**
+   * Maneja el proceso de inicio de sesión
+   * Valida los campos y gestiona errores
+   */
   async onSignIn() {
     // Validar el email (primera prioridad)
     if (!this.email || this.email.trim() === '') {
@@ -137,7 +195,6 @@ export class LoginPage {
       return;
     }
     try {
-      // Usar el servicio de autenticación en lugar de afAuth directamente
       const result = await this.authService.signIn(this.email, this.password);
 
       // Manejar el recordar email
@@ -156,6 +213,10 @@ export class LoginPage {
     }
   }
 
+  /**
+   * Maneja el proceso de registro de nuevos usuarios
+   * Valida los campos y gestiona errores
+   */
   async onSignUp() {
     // Validar el email (primera prioridad)
     if (!this.email || this.email.trim() === '') {
@@ -204,6 +265,9 @@ export class LoginPage {
     }
   }
 
+  /**
+   * Navega a la página de recuperación de contraseña
+   */
   async goToForgotPassword() {
     this.router.navigate(['/forgot-password']);
   }

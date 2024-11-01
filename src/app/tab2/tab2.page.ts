@@ -1,3 +1,13 @@
+/**
+ * Tab2Page Component (Cryptos Page)
+ * 
+ * Este componente maneja la visualización y gestión de monedas y criptomonedas.
+ * Funcionalidades principales:
+ * - Listado de monedas y criptomonedas
+ * - Búsqueda y filtrado
+ * - Gestión de favoritos
+ * - Navegación a detalles
+ */
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from 'src/services/api.service';
 import { Router } from '@angular/router';
@@ -20,6 +30,9 @@ export class Tab2Page implements OnInit {
     public apiService: ApiService,
     private router: Router) {}
 
+  /**
+   * Inicializa el componente cargando datos y suscripciones
+   */
   ngOnInit() {
     this.consumirApi();
     this.consumirApiCrypto();
@@ -31,6 +44,9 @@ export class Tab2Page implements OnInit {
       : (this.sliderTipo = 'monedas');
   }
 
+  /**
+   * Obtiene y procesa la lista de monedas desde la API
+   */
   consumirApi() {
     this.apiService.obtenerApi().subscribe(
       (moneda: any) => {
@@ -47,6 +63,9 @@ export class Tab2Page implements OnInit {
     );
   }
 
+  /**
+   * Obtiene y procesa la lista de criptomonedas desde la API
+   */
   consumirApiCrypto() {
     this.apiService.obtenerApiCrypto().subscribe(
       (crypto: any) => {
@@ -63,10 +82,19 @@ export class Tab2Page implements OnInit {
     );
   }
 
+  /**
+   * Ordena una lista alfabéticamente por el nombre
+   * @param {any[]} lista - Lista a ordenar
+   * @returns {any[]} Lista ordenada alfabéticamente
+   */
   ordenarAlfabeticamente(lista: any[]): any[] {
     return lista.sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  /**
+   * Filtra la lista de monedas según el término de búsqueda
+   * @param {any} filtro - Evento del input de búsqueda
+   */
   buscador(filtro: any) {
     const buscar = filtro.target.value.toLowerCase();
     if (buscar === '') {
@@ -80,6 +108,10 @@ export class Tab2Page implements OnInit {
     }
   }
 
+  /**
+   * Filtra la lista de criptomonedas según el término de búsqueda
+   * @param {any} filtro - Evento del input de búsqueda
+   */
   buscadorCrypto(filtro: any) {
     const buscar = filtro.target.value.toLowerCase();
     if (buscar === '') {
@@ -93,6 +125,10 @@ export class Tab2Page implements OnInit {
     }
   }
 
+  /**
+   * Navega a la página de detalles de una moneda
+   * @param {any} item - Moneda seleccionada
+   */
   abrirDetalles(item: any) {
     this.router.navigate(['/tabs/detalles', 'moneda', item.id], {
       replaceUrl: true,
@@ -100,6 +136,10 @@ export class Tab2Page implements OnInit {
     localStorage.setItem('tab', JSON.stringify(1));
   }
 
+  /**
+   * Navega a la página de detalles de una criptomoneda
+   * @param {any} item - Criptomoneda seleccionada
+   */
   abrirDetallesCrypto(item: any) {
     this.router.navigate(['/tabs/detalles', 'crypto', item.code], {
       replaceUrl: true,
@@ -107,6 +147,10 @@ export class Tab2Page implements OnInit {
     localStorage.setItem('tab', JSON.stringify(2));
   }
 
+  /**
+   * Alterna el estado de favorito de una moneda
+   * @param {any} item - Moneda a alternar en favoritos
+   */
   SeleccionarFavorito(item: any) {
     this.apiService.alternarFavorito(item, 'moneda');
     // Actualiza el estado de esFavorito para todas las monedas
@@ -115,6 +159,10 @@ export class Tab2Page implements OnInit {
     });
   }
 
+  /**
+   * Alterna el estado de favorito de una criptomoneda
+   * @param {any} item - Criptomoneda a alternar en favoritos
+   */
   SeleccionarFavoritosCrypto(item: any) {
     this.apiService.alternarFavorito(item, 'crypto');
     // Actualiza el estado de esFavorito para todas las criptos

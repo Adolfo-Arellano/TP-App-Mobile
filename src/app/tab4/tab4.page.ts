@@ -1,3 +1,14 @@
+/**
+ * Tab4Page Component (Profile Page)
+ * 
+ * Este componente maneja la gestión del perfil de usuario, incluyendo:
+ * - Edición de información personal
+ * - Gestión de credenciales (email y contraseña)
+ * - Gestión de foto de perfil
+ * - Vinculación con redes sociales (Twitter)
+ * - Verificación de email
+ * - Cierre de sesión
+ */
 import { Component, OnInit } from '@angular/core';
 import { AlertController, ToastController, ActionSheetController } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -14,6 +25,14 @@ export class Tab4Page implements OnInit {
   isTwitterLinked: boolean = false;
   profileImage: string = 'assets/default-avatar.png';
 
+  /**
+   * Constructor del componente Profile
+   * @param authService Servicio para manejo de autenticación
+   * @param alertController Controlador para mostrar alertas
+   * @param toastController Controlador para mostrar mensajes toast
+   * @param actionSheetController Controlador para mostrar hojas de acción
+   * @param router Servicio de navegación
+   */
   constructor(
     private authService: AuthService,
     private alertController: AlertController,
@@ -22,11 +41,17 @@ export class Tab4Page implements OnInit {
     private router: Router
   ) {}
 
+  /**
+   * Inicializa el componente cargando el perfil del usuario y el estado de Twitter
+   */
   ngOnInit() {
     this.loadUserProfile();
     this.checkTwitterStatus();
   }
 
+  /**
+   * Carga el perfil del usuario y se suscribe a cambios en el estado de autenticación
+   */
   loadUserProfile() {
     // Usar el observable authState para mantener actualizado el perfil
     this.authService.getAuthState().subscribe(user => {
@@ -34,6 +59,10 @@ export class Tab4Page implements OnInit {
     });
   }
 
+  /**
+   * Muestra un mensaje toast temporal
+   * @param {string} message Mensaje a mostrar
+   */
   async presentToast(message: string) {
     const toast = await this.toastController.create({
       message,
@@ -43,6 +72,9 @@ export class Tab4Page implements OnInit {
     await toast.present();
   }
 
+  /**
+   * Muestra un formulario de edición del perfil y procesa los cambios
+   */
   async editProfile() {
     const alert = await this.alertController.create({
       header: 'Editar Perfil',
@@ -109,6 +141,10 @@ export class Tab4Page implements OnInit {
     await alert.present();
   }
 
+  /**
+   * Muestra un formulario para cambiar el email y procesa el cambio
+   * Requiere reautenticación del usuario
+   */
   async editEmail() {
     const alert = await this.alertController.create({
       header: 'Cambiar Email',
@@ -155,6 +191,10 @@ export class Tab4Page implements OnInit {
     await alert.present();
   }
 
+  /**
+   * Muestra un formulario para cambiar la contraseña y procesa el cambio
+   * Requiere reautenticación del usuario
+   */
   async changePassword() {
     const alert = await this.alertController.create({
       header: 'Cambiar Contraseña',
@@ -211,6 +251,10 @@ export class Tab4Page implements OnInit {
     await alert.present();
   }
 
+  
+  /**
+   * Envía un email de verificación al correo del usuario
+   */
   async verifyEmail() {
     try {
       await this.authService.sendEmailVerification();
@@ -220,6 +264,9 @@ export class Tab4Page implements OnInit {
     }
   }
 
+  /**
+   * Muestra un menú de opciones para cambiar la foto de perfil
+   */
   async changeProfilePicture() {
     const actionSheet = await this.actionSheetController.create({
       header: 'Cambiar foto de perfil',
@@ -249,6 +296,9 @@ export class Tab4Page implements OnInit {
     await actionSheet.present();
   }
 
+  /**
+   * Toma una foto usando la cámara del dispositivo
+   */
   async takePicture() {
     try {
       const image = await Camera.getPhoto({
@@ -268,6 +318,9 @@ export class Tab4Page implements OnInit {
     }
   }
 
+  /**
+   * Sube una foto desde la galería del dispositivo
+   */
   async uploadPicture() {
     const input = document.createElement('input');
     input.type = 'file';
@@ -290,10 +343,18 @@ export class Tab4Page implements OnInit {
     input.click();
   }
 
+  /**
+   * Verifica si el usuario tiene una cuenta de Twitter vinculada
+   */
   async checkTwitterStatus() {
     this.isTwitterLinked = this.authService.isTwitterLinked();
   }
   
+  /**
+   * Maneja la vinculación/desvinculación de la cuenta de Twitter
+   * Si está vinculada, muestra confirmación para desvincular
+   * Si no está vinculada, inicia el proceso de vinculación
+   */
   async handleTwitterConnection() {
     try {
       if (this.isTwitterLinked) {
@@ -324,7 +385,6 @@ export class Tab4Page implements OnInit {
         this.checkTwitterStatus();
       }
     } catch (error: any) {
-      console.error('Error con Twitter:', error);
       let errorMessage = 'Error al procesar la conexión con Twitter';
       
       if (error.code === 'auth/provider-already-linked') {
@@ -344,6 +404,9 @@ export class Tab4Page implements OnInit {
     }
   }
 
+  /**
+   * Muestra una confirmación y procesa el cierre de sesión
+   */
   async logout() {
     const alert = await this.alertController.create({
       header: 'Cerrar Sesión',

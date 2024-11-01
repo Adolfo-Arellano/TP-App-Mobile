@@ -1,3 +1,14 @@
+/**
+ * Tab3Page Component (Conversion Page)
+ * 
+ * Este componente maneja la funcionalidad de conversión entre monedas y criptomonedas.
+ * Características principales:
+ * - Conversión en tiempo real entre cualquier par de monedas/criptos
+ * - Calculadora integrada para facilitar los cálculos
+ * - Búsqueda y filtrado de monedas
+ * - Generación de comprobantes en PDF
+ * - Gestión de favoritos
+ */
 import { Component, OnInit } from '@angular/core';
 import { ApiService, Currency } from 'src/services/api.service';
 import * as pdfMake from 'pdfmake/build/pdfmake';
@@ -72,8 +83,16 @@ export class Tab3Page implements OnInit {
     { value: ',', display: ',' },
   ];
 
+  /**
+   * Constructor del componente
+   * @param apiService Servicio para interactuar con la API de criptomonedas
+   */
   constructor(public apiService: ApiService) {}
 
+  /**
+   * Inicializa el componente cargando los datos necesarios
+   * Obtiene las listas de monedas y criptomonedas, y carga los favoritos
+   */
   async ngOnInit() {
     try {
       await Promise.all([this.consumirApi(), this.consumirApiCrypto()]);
@@ -83,6 +102,9 @@ export class Tab3Page implements OnInit {
     }
   }
 
+  /**
+   * Carga las monedas y criptomonedas favoritas desde el almacenamiento local
+   */
   cargarFavoritos() {
     this.favoritosMonedas = this.apiService.obtenerFavoritos('moneda');
     this.favoritosCryptos = this.apiService.obtenerFavoritos('crypto');
@@ -92,6 +114,9 @@ export class Tab3Page implements OnInit {
     });
   }
 
+  /**
+   * Obtiene la lista de monedas desde la API
+   */
   async consumirApi() {
     try {
       const response = await this.apiService.obtenerApi().toPromise();
@@ -103,6 +128,9 @@ export class Tab3Page implements OnInit {
     }
   }
 
+  /**
+   * Obtiene la lista de criptomonedas desde la API
+   */
   async consumirApiCrypto() {
     try {
       const response = await this.apiService.obtenerApiCrypto().toPromise();
@@ -114,10 +142,20 @@ export class Tab3Page implements OnInit {
     }
   }
 
+  /**
+   * Ordena una lista de monedas alfabéticamente por nombre
+   * @param {Currency[]} lista Lista de monedas a ordenar
+   * @returns {Currency[]} Lista ordenada alfabéticamente
+   */
   ordenarAlfabeticamente(lista: Currency[]): Currency[] {
     return [...lista].sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  /**
+   * Selecciona el tipo de moneda (crypto o tradicional) para el origen o destino
+   * @param {string} tipo Tipo de moneda ('monedas', 'cryptos', 'favoritosMonedas', 'favoritosCryptos')
+   * @param {'from' | 'to'} origen Indica si es la moneda de origen ('from') o destino ('to')
+   */
   seleccionarTipo(tipo: string, origen: 'from' | 'to') {
     this.searchTerm = '';
 
@@ -141,6 +179,9 @@ export class Tab3Page implements OnInit {
     this.actualizarListaFiltrada();
   }
 
+  /**
+   * Actualiza la lista filtrada de monedas según el tipo seleccionado y término de búsqueda
+   */
   actualizarListaFiltrada() {
     const tipo = this.isSelectingFrom ? this.fromType : this.toType;
     let lista: Currency[] = [];
@@ -176,11 +217,19 @@ export class Tab3Page implements OnInit {
     console.log('Lista filtrada:', this.filteredCurrencies);
   }
 
+  /**
+   * Maneja el evento de búsqueda y actualiza la lista filtrada
+   * @param {any} evento Evento del input de búsqueda
+   */
   buscar(evento: any) {
     this.searchTerm = evento.target.value;
     this.actualizarListaFiltrada();
   }
 
+  /**
+   * Selecciona una moneda para la conversión
+   * @param {Currency} currency Moneda seleccionada
+   */
   seleccionarMoneda(currency: Currency) {
     if (this.isSelectingFrom) {
       this.fromCurrency = currency;
@@ -198,6 +247,9 @@ export class Tab3Page implements OnInit {
     }
   }
 
+  /**
+   * Realiza la conversión entre las monedas seleccionadas
+   */
   async convertir() {
     if (!this.fromCurrency || !this.toCurrency || !this.amount) {
       this.conversionResult = 0;
@@ -235,6 +287,10 @@ export class Tab3Page implements OnInit {
     }
   }
 
+  /**
+   * Maneja la entrada de la calculadora
+   * @param {string | number} value Valor del botón presionado
+   */
   handleCalculatorInput(value: string | number) {
     if (value === 'C') {
       this.limpiar();
@@ -247,6 +303,10 @@ export class Tab3Page implements OnInit {
     }
   }
 
+  /**
+   * Agrega un número al monto actual
+   * @param {string} number Número a agregar
+   */
   agregarNumero(number: string) {
     if (number === '0' && this.amount === '0') return;
 
@@ -259,6 +319,9 @@ export class Tab3Page implements OnInit {
     this.convertir();
   }
 
+  /**
+   * Agrega una coma decimal al monto actual
+   */
   agregarComa() {
     if (!this.amount) {
       this.amount = '0,';
@@ -267,11 +330,17 @@ export class Tab3Page implements OnInit {
     }
   }
 
+  /**
+   * Limpia el monto y el resultado de la conversión
+   */
   limpiar() {
     this.amount = '';
     this.conversionResult = 0;
   }
 
+  /**
+   * Borra el último carácter del monto
+   */
   borrarUltimo() {
     this.amount = this.amount.slice(0, -1);
     if (this.amount) {
@@ -281,6 +350,10 @@ export class Tab3Page implements OnInit {
     }
   }
 
+  /**
+   * Limpia la selección de moneda de origen o destino
+   * @param {'from' | 'to'} origen Indica si se limpia la selección de origen o destino
+   */
   limpiarSeleccion(origen: 'from' | 'to') {
     if (origen === 'from') {
       this.fromType = '';
@@ -296,6 +369,9 @@ export class Tab3Page implements OnInit {
     this.conversionResult = 0;
   }
 
+  /**
+   * Genera y descarga un PDF con el comprobante de la conversión
+   */
   descargarPdf() {
     if (
       !this.fromCurrency ||

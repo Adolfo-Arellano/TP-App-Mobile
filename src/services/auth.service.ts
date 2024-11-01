@@ -25,39 +25,53 @@ export class AuthService {
     private firestore: AngularFirestore,
     private router: Router
   ) {
-  // Observa cambios en el estado de autenticación
-  this.afAuth.authState.subscribe(user => {
-    if (user) {
-      // Si el usuario está autenticado y está en la página de login, redirigir a tabs
-      if (this.router.url === '/login') {
-        this.router.navigate(['/tabs/tab2'], { replaceUrl: true });
+    this.afAuth.authState.subscribe(user => {
+      if (user) {
+        if (this.router.url === '/login') {
+          this.router.navigate(['/tabs/tab2'], { replaceUrl: true });
+        }
+      } else {
+        this.router.navigate(['/login'], { replaceUrl: true });
       }
-    } else {
-      // Si no está autenticado, redirigir a login
-      this.router.navigate(['/login'], { replaceUrl: true });
-    }
-  });
-}
+    });
+  }
 
+  /**
+   * Obtiene el usuario actualmente autenticado
+   * @returns {Promise<firebase.User | null>} Promesa con el usuario actual
+   */
   getCurrentUser() {
     return this.afAuth.currentUser;
   }
 
+  /**
+   * Obtiene el observable del estado de autenticación
+   * @returns {Observable<firebase.User | null>} Observable del estado de autenticación
+   */
   getAuthState() {
     return this.afAuth.authState;
   }
 
+  /**
+   * Verifica si hay un usuario autenticado
+   * @returns {Observable<boolean>} Observable que emite true si hay un usuario autenticado
+   */
   isAuthenticated(): Observable<boolean> {
     return this.afAuth.authState.pipe(
       map(user => !!user)
     );
   }
 
+  /**
+   * Inicia sesión con email y contraseña
+   * @param {string} email - Email del usuario
+   * @param {string} password - Contraseña del usuario
+   * @returns {Promise<firebase.auth.UserCredential>} Promesa con las credenciales del usuario
+   */
   async signIn(email: string, password: string) {
     try {
       const result = await this.afAuth.signInWithEmailAndPassword(email, password);
       if (result.user) {
-        // Redirigir después de login exitoso
         await this.router.navigate(['/tabs/tab2'], { replaceUrl: true });
       }
       return result;
@@ -66,6 +80,12 @@ export class AuthService {
     }
   }
 
+  /**
+   * Registra un nuevo usuario con email y contraseña
+   * @param {string} email - Email del nuevo usuario
+   * @param {string} password - Contraseña del nuevo usuario
+   * @returns {Promise<firebase.auth.UserCredential>} Promesa con las credenciales del usuario
+   */
   async signUp(email: string, password: string) {
     try {
       const result = await this.afAuth.createUserWithEmailAndPassword(email, password);
@@ -78,6 +98,10 @@ export class AuthService {
     }
   }
 
+  /**
+   * Cierra la sesión del usuario actual
+   * @returns {Promise<void>} Promesa que se resuelve cuando se cierra la sesión
+   */
   async signOut() {
     try {
       await this.afAuth.signOut();
@@ -87,17 +111,20 @@ export class AuthService {
     }
   }
 
+  /**
+   * Actualiza el perfil del usuario
+   * @param {UserProfile} profileData - Datos del perfil a actualizar
+   * @returns {Promise<boolean>} Promesa que indica si la actualización fue exitosa
+   */
   async updateProfile(profileData: UserProfile) {
     const user = await this.getCurrentUser();
     if (user) {
       try {
-        // Actualizamos datos básicos de Auth
         await user.updateProfile({
           displayName: profileData.displayName,
           photoURL: profileData.photoURL
         });
 
-        // Guardamos datos adicionales en Firestore
         await this.firestore.collection('users').doc(user.uid).set({
           birthDate: profileData.birthDate,
           phone: profileData.phone,
@@ -116,15 +143,24 @@ export class AuthService {
     return false;
   }
 
+  /**
+   * Obtiene el perfil del usuario desde Firestore
+   * @returns {Promise<any | null>} Promesa con los datos del perfil del usuario
+   */
   async getUserProfile() {
     const user = await this.getCurrentUser();
     if (user) {
       const docSnapshot = await this.firestore.collection('users').doc(user.uid).get().toPromise();
-      return docSnapshot?.data() || null;  // Usamos el operador de encadenamiento opcional
+      return docSnapshot?.data() || null;
     }
     return null;
   }
 
+  /**
+   * Actualiza el email del usuario
+   * @param {string} newEmail - Nuevo email del usuario
+   * @returns {Promise<boolean>} Promesa que indica si la actualización fue exitosa
+   */
   async updateEmail(newEmail: string) {
     const user = await this.getCurrentUser();
     if (user) {
@@ -139,6 +175,11 @@ export class AuthService {
     return false;
   }
 
+  /**
+   * Actualiza la contraseña del usuario
+   * @param {string} newPassword - Nueva contraseña del usuario
+   * @returns {Promise<boolean>} Promesa que indica si la actualización fue exitosa
+   */
   async updatePassword(newPassword: string) {
     const user = await this.getCurrentUser();
     if (user) {
@@ -152,6 +193,10 @@ export class AuthService {
     return false;
   }
 
+  /**
+   * Envía un email de verificación al usuario actual
+   * @returns {Promise<boolean>} Promesa que indica si el envío fue exitoso
+   */
   async sendEmailVerification() {
     const user = await this.getCurrentUser();
     if (user) {
@@ -165,6 +210,11 @@ export class AuthService {
     return false;
   }
 
+  /**
+   * Reautentica al usuario actual con su contraseña
+   * @param {string} password - Contraseña actual del usuario
+   * @returns {Promise<firebase.auth.UserCredential | null>} Promesa con las credenciales del usuario
+   */
   async reauthenticate(password: string) {
     const user = await this.getCurrentUser();
     if (user && user.email) {
@@ -177,6 +227,10 @@ export class AuthService {
     return null;
   }
 
+  /**
+   * Vincula la cuenta de Twitter al usuario actual
+   * @returns {Promise<boolean>} Promesa que indica si la vinculación fue exitosa
+   */
   async linkTwitter() {
     try {
       const provider = new firebase.auth.TwitterAuthProvider();
@@ -192,6 +246,10 @@ export class AuthService {
     }
   }
 
+  /**
+   * Desvincula la cuenta de Twitter del usuario actual
+   * @returns {Promise<boolean>} Promesa que indica si la desvinculación fue exitosa
+   */
   async unlinkTwitter() {
     try {
       const currentUser = await this.getCurrentUser();
@@ -206,6 +264,10 @@ export class AuthService {
     }
   }
 
+  /**
+   * Verifica si el usuario tiene vinculada una cuenta de Twitter
+   * @returns {boolean} True si el usuario tiene vinculada una cuenta de Twitter
+   */
   isTwitterLinked(): boolean {
     const currentUser = firebase.auth().currentUser;
     if (currentUser && currentUser.providerData) {
