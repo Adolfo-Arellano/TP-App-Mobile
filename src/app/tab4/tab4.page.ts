@@ -24,6 +24,7 @@ export class Tab4Page implements OnInit {
   user: any = null;
   isTwitterLinked: boolean = false;
   profileImage: string = 'assets/default-avatar.png';
+  memberSince: string = '';
 
   /**
    * Constructor del componente Profile
@@ -54,9 +55,31 @@ export class Tab4Page implements OnInit {
    * Carga el perfil del usuario y se suscribe a cambios en el estado de autenticación
    */
   loadUserProfile() {
-    // Usar el observable authState para mantener actualizado el perfil
     this.authService.getAuthState().subscribe(user => {
-      this.user = user;
+      if (user) {
+        // Información básica del usuario
+        this.user = {
+          email: user.email,
+          memberSince: new Date(user.metadata?.creationTime || Date.now()).toLocaleDateString('es-ES', {
+            month: 'short',
+            year: 'numeric'
+          })
+        };
+
+        // Cargar datos adicionales del perfil desde SessionStorage
+        const profileData = sessionStorage.getItem('userProfileData');
+        if (profileData) {
+          const parsedData = JSON.parse(profileData);
+          this.user = {
+            ...this.user,
+            ...parsedData
+          };
+        }
+
+        // Cargar imagen del perfil
+        const savedImage = sessionStorage.getItem('userProfileImage');
+        this.profileImage = savedImage || 'assets/default-avatar.png';
+      }
     });
   }
 
@@ -121,15 +144,19 @@ export class Tab4Page implements OnInit {
           text: 'Guardar',
           handler: async (data) => {
             try {
-              const profileData = {
-                displayName: data.displayName,
-                birthDate: data.birthDate,
-                phone: data.phone,
-                location: data.location,
-                bio: data.bio
+              // Mantener el email y memberSince al actualizar
+              const updatedData = {
+                ...data,
+                email: this.user.email,
+                memberSince: this.user.memberSince
               };
               
-              await this.authService.updateProfile(profileData);
+              // Guardar en SessionStorage
+              sessionStorage.setItem('userProfileData', JSON.stringify(updatedData));
+              
+              // Actualizar estado local
+              this.user = updatedData;
+
               await this.presentToast('Perfil actualizado correctamente');
             } catch (error) {
               console.error('Error al actualizar perfil:', error);
@@ -310,8 +337,9 @@ export class Tab4Page implements OnInit {
       });
 
       if (image.dataUrl) {
+        sessionStorage.setItem('userProfileImage', image.dataUrl);
         this.profileImage = image.dataUrl;
-        await this.presentToast('Foto actualizada');
+        await this.presentToast('Foto actualizada correctamente');
       }
     } catch (error) {
       console.error('Error al tomar la foto:', error);
@@ -332,8 +360,9 @@ export class Tab4Page implements OnInit {
       if (file) {
         try {
           const url = URL.createObjectURL(file);
+          sessionStorage.setItem('userProfileImage', url);
           this.profileImage = url;
-          await this.presentToast('Foto actualizada');
+          await this.presentToast('Foto actualizada correctamente');
         } catch (error) {
           console.error('Error al cargar la imagen:', error);
           await this.presentToast('Error al cargar la imagen');

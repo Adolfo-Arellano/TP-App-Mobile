@@ -10,14 +10,12 @@
           <ion-icon name="camera"></ion-icon>
         </div>
       </div>
-      <div class="user-info">
-        <ion-text class="user-email">
-          <ion-label>{{ user?.email || 'Usuario' }}</ion-label>
-        </ion-text>
-        <ion-text class="user-since" *ngIf="user?.metadata?.creationTime">
-          <ion-label>Miembro desde {{ user?.metadata?.creationTime | date:'MMM yyyy' }}</ion-label>
-        </ion-text>
-      </div>
+      <ion-text>
+        <h2>{{ user?.displayName || 'Usuario' }}</h2>
+      </ion-text>
+      <ion-text color="medium" *ngIf="user?.memberSince">
+        <p>Miembro desde {{ user?.memberSince }}</p>
+      </ion-text>
     </div>
 
     <!-- Secciones del perfil -->
