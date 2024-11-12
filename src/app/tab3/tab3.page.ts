@@ -365,6 +365,10 @@ export class Tab3Page implements OnInit {
       return;
     }
 
+    // Reemplaza la coma por punto y convierte a número para asegurarte de que es compatible
+    const parsedAmount = parseFloat(this.amount.replace(',', '.'));
+
+    // Llama a la función de descarga con el valor numérico
     this.descargarPdf(
       {
         name: this.fromCurrency.name,
@@ -374,7 +378,7 @@ export class Tab3Page implements OnInit {
         name: this.toCurrency.name,
         code: this.toCurrency.id ?? this.toCurrency.code ?? '',
       },
-      Number(this.amount),
+      parsedAmount,
       this.conversionResult
     );
   }
@@ -382,13 +386,13 @@ export class Tab3Page implements OnInit {
   async descargarPdf(
     fromCurrency: { name: string; id?: string; code: string },
     toCurrency: { name: string; id?: string; code: string },
-    amount: number, 
+    amount: number,
     conversionResult: number
   ) {
     if (!fromCurrency || !toCurrency || !amount || !conversionResult) {
       return;
     }
-  
+
     // Crear el PDF
     const pdfBase64 = await this.createPdf(
       fromCurrency,
@@ -396,7 +400,7 @@ export class Tab3Page implements OnInit {
       amount,
       conversionResult
     );
-  
+
     // En dispositivos móviles reales (no navegador)
     if (isPlatform('hybrid')) {
       try {
@@ -405,7 +409,7 @@ export class Tab3Page implements OnInit {
           data: pdfBase64,
           directory: Directory.Documents,
         });
-  
+
         await Share.share({
           title: 'Comprobante de conversión',
           text: 'Aquí tienes tu comprobante de conversión.',
@@ -428,6 +432,7 @@ export class Tab3Page implements OnInit {
   }
 
   // Método para crear el PDF con la información de la conversión de divisas
+  // Método para crear el PDF con la información de la conversión de divisas
   async createPdf(
     fromCurrency: { name: string; id?: string; code: string },
     toCurrency: { name: string; id?: string; code: string },
@@ -440,6 +445,10 @@ export class Tab3Page implements OnInit {
     const fontSize = 12;
     const yOffset = 50;
 
+    // Convierte los números a cadenas y reemplaza los puntos decimales por comas
+    const amountStr = amount.toString().replace('.', ',');
+    const conversionResultStr = conversionResult.toFixed(3).replace('.', ',');
+
     page.drawText('Comprobante de conversión', { x: 50, y: 350, size: 18 });
     page.drawText(
       `De: ${fromCurrency.name} - ${fromCurrency.id ?? fromCurrency.code}`,
@@ -450,13 +459,13 @@ export class Tab3Page implements OnInit {
       { x: 50, y: 300 - yOffset, size: fontSize }
     );
     page.drawText(
-      `Cantidad: $ ${amount} ${fromCurrency.name} - ${
+      `Cantidad: $ ${amountStr} ${fromCurrency.name} - ${
         fromCurrency.id ?? fromCurrency.code
       }`,
       { x: 50, y: 300 - yOffset * 2, size: fontSize }
     );
     page.drawText(
-      `Resultado: $ ${conversionResult} ${toCurrency.name} - ${
+      `Resultado: $ ${conversionResultStr} ${toCurrency.name} - ${
         toCurrency.id ?? toCurrency.code
       }`,
       { x: 50, y: 300 - yOffset * 3, size: fontSize }
