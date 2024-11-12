@@ -1,6 +1,6 @@
 /**
  * Auth Service
- * 
+ *
  * Este servicio maneja toda la lógica de autenticación y gestión de usuarios.
  * Funcionalidades principales:
  * - Autenticación de usuarios (registro, login, logout)
@@ -10,11 +10,11 @@
  * - Integración con redes sociales (Twitter)
  * - Manejo de sesiones
  * - Navegación basada en estado de autenticación
- * 
+ *
  * Utiliza Firebase Authentication para la gestión de usuarios y Firestore
  * para almacenar datos adicionales del perfil. Implementa un sistema
  * de navegación automática basado en el estado de autenticación.
- * 
+ *
  * La interfaz UserProfile define la estructura de datos para la información
  * adicional del usuario que se almacena en Firestore.
  */
@@ -45,7 +45,7 @@ export class AuthService {
     private firestore: AngularFirestore,
     private router: Router
   ) {
-    this.afAuth.authState.subscribe(user => {
+    this.afAuth.authState.subscribe((user) => {
       if (user) {
         if (this.router.url === '/login') {
           this.router.navigate(['/tabs/tab2'], { replaceUrl: true });
@@ -77,9 +77,7 @@ export class AuthService {
    * @returns {Observable<boolean>} Observable que emite true si hay un usuario autenticado
    */
   isAuthenticated(): Observable<boolean> {
-    return this.afAuth.authState.pipe(
-      map(user => !!user)
-    );
+    return this.afAuth.authState.pipe(map((user) => !!user));
   }
 
   /**
@@ -89,7 +87,10 @@ export class AuthService {
    * @returns {Promise<firebase.auth.UserCredential>} Promesa con las credenciales del usuario
    */
   async signIn(email: string, password: string) {
-    const result = await this.afAuth.signInWithEmailAndPassword(email, password);
+    const result = await this.afAuth.signInWithEmailAndPassword(
+      email,
+      password
+    );
     if (result.user) {
       await this.router.navigate(['/tabs/tab2'], { replaceUrl: true });
     }
@@ -103,7 +104,10 @@ export class AuthService {
    * @returns {Promise<firebase.auth.UserCredential>} Promesa con las credenciales del usuario
    */
   async signUp(email: string, password: string) {
-    const result = await this.afAuth.createUserWithEmailAndPassword(email, password);
+    const result = await this.afAuth.createUserWithEmailAndPassword(
+      email,
+      password
+    );
     if (result.user) {
       await result.user.sendEmailVerification();
     }
@@ -129,17 +133,20 @@ export class AuthService {
     if (user) {
       await user.updateProfile({
         displayName: profileData.displayName,
-        photoURL: profileData.photoURL
+        photoURL: profileData.photoURL,
       });
 
-      await this.firestore.collection('users').doc(user.uid).set({
-        birthDate: profileData.birthDate,
-        phone: profileData.phone,
-        location: profileData.location,
-        bio: profileData.bio,
-        email: user.email,
-        updatedAt: new Date()
-      }, { merge: true });
+      await this.firestore.collection('users').doc(user.uid).set(
+        {
+          birthDate: profileData.birthDate,
+          phone: profileData.phone,
+          location: profileData.location,
+          bio: profileData.bio,
+          email: user.email,
+          updatedAt: new Date(),
+        },
+        { merge: true }
+      );
 
       return true;
     }
@@ -153,7 +160,11 @@ export class AuthService {
   async getUserProfile() {
     const user = await this.getCurrentUser();
     if (user) {
-      const docSnapshot = await this.firestore.collection('users').doc(user.uid).get().toPromise();
+      const docSnapshot = await this.firestore
+        .collection('users')
+        .doc(user.uid)
+        .get()
+        .toPromise();
       return docSnapshot?.data() || null;
     }
     return null;
@@ -227,30 +238,38 @@ export class AuthService {
     try {
       const provider = new firebase.auth.TwitterAuthProvider();
       const user = await this.afAuth.currentUser;
-      
+
       if (!user) {
         throw new Error('No user logged in');
       }
-  
+
       const result = await user.linkWithPopup(provider);
-      
+
       if (result.user) {
-        await this.firestore.collection('users').doc(user.uid).update({
-          twitterLinked: true,
-          twitterUsername: result.user.displayName || null,
-          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        await this.firestore
+          .collection('users')
+          .doc(user.uid)
+          .update({
+            twitterLinked: true,
+            twitterUsername: result.user.displayName || null,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+          });
       }
-  
+
       return result;
     } catch (error: any) {
-      
       if (error.code === 'auth/credential-already-in-use') {
-        throw new Error('Esta cuenta de Twitter ya está vinculada a otro usuario');
+        throw new Error(
+          'Esta cuenta de Twitter ya está vinculada a otro usuario'
+        );
       } else if (error.code === 'auth/popup-blocked') {
-        throw new Error('El popup fue bloqueado. Por favor, permite ventanas emergentes');
+        throw new Error(
+          'El popup fue bloqueado. Por favor, permite ventanas emergentes'
+        );
       } else if (error.code === 'auth/invalid-credential') {
-        throw new Error('Por favor, inicia sesión en Twitter cuando se abra la ventana');
+        throw new Error(
+          'Por favor, inicia sesión en Twitter cuando se abra la ventana'
+        );
       }
       throw error;
     }
@@ -266,7 +285,7 @@ export class AuthService {
       await user.unlink('twitter.com');
       // Actualizar el estado en Firestore
       await this.firestore.collection('users').doc(user.uid).update({
-        twitterLinked: false
+        twitterLinked: false,
       });
       return true;
     }
@@ -281,7 +300,9 @@ export class AuthService {
     const user = await this.afAuth.currentUser;
     if (user) {
       const providers = user.providerData;
-      return providers.some(provider => provider?.providerId === 'twitter.com');
+      return providers.some(
+        (provider) => provider?.providerId === 'twitter.com'
+      );
     }
     return false;
   }

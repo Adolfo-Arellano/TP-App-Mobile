@@ -30,11 +30,13 @@
           <ion-icon name="person-outline" slot="start"></ion-icon>
           <ion-label class="ion-label-info">
             <div class="label-title">Perfil</div>
-            <div class="label-subtitle">{{ user?.displayName || 'Editar información personal' }}</div>
+            <div class="label-subtitle">
+              {{ user?.displayName || 'Editar información personal' }}
+            </div>
           </ion-label>
         </ion-item>
-        
-        <ion-item button detail (click)="editEmail()">
+
+        <ion-item>
           <ion-icon name="mail-outline" slot="start"></ion-icon>
           <ion-label class="ion-label-info">
             <div class="label-title">Email</div>
@@ -57,19 +59,26 @@
           </ion-label>
         </ion-item>
 
-        <ion-item button [detail]="!user?.emailVerified" (click)="!user?.emailVerified && verifyEmail()">
+        <ion-item
+          button
+          [detail]="!user?.emailVerified"
+          (click)="!user?.emailVerified && verifyEmail()"
+        >
           <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>Verificación</h3>
             <p>Estado de la cuenta</p>
           </ion-label>
-          <ion-badge slot="end" [color]="user?.emailVerified ? 'success' : 'warning'">
+          <ion-badge
+            slot="end"
+            [color]="user?.emailVerified ? 'success' : 'warning'"
+          >
             {{ user?.emailVerified ? 'Verificado' : 'Pendiente' }}
           </ion-badge>
         </ion-item>
       </ion-item-group>
 
-      <!-- Redes Sociales -->
+      <!-- Redes Sociales
       <ion-item-group>
         <ion-item-divider>
           <ion-label>Redes Sociales</ion-label>
@@ -85,7 +94,7 @@
             {{ isTwitterLinked ? 'Conectado' : 'Desconectado' }}
           </ion-badge>
         </ion-item>
-      </ion-item-group>
+      </ion-item-group> -->
     </div>
 
     <!-- Botón de cerrar sesión -->
