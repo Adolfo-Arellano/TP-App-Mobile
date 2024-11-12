@@ -89,15 +89,11 @@ export class AuthService {
    * @returns {Promise<firebase.auth.UserCredential>} Promesa con las credenciales del usuario
    */
   async signIn(email: string, password: string) {
-    try {
-      const result = await this.afAuth.signInWithEmailAndPassword(email, password);
-      if (result.user) {
-        await this.router.navigate(['/tabs/tab2'], { replaceUrl: true });
-      }
-      return result;
-    } catch (error) {
-      throw error;
+    const result = await this.afAuth.signInWithEmailAndPassword(email, password);
+    if (result.user) {
+      await this.router.navigate(['/tabs/tab2'], { replaceUrl: true });
     }
+    return result;
   }
 
   /**
@@ -107,15 +103,11 @@ export class AuthService {
    * @returns {Promise<firebase.auth.UserCredential>} Promesa con las credenciales del usuario
    */
   async signUp(email: string, password: string) {
-    try {
-      const result = await this.afAuth.createUserWithEmailAndPassword(email, password);
-      if (result.user) {
-        await result.user.sendEmailVerification();
-      }
-      return result;
-    } catch (error) {
-      throw error;
+    const result = await this.afAuth.createUserWithEmailAndPassword(email, password);
+    if (result.user) {
+      await result.user.sendEmailVerification();
     }
+    return result;
   }
 
   /**
@@ -123,12 +115,8 @@ export class AuthService {
    * @returns {Promise<void>} Promesa que se resuelve cuando se cierra la sesión
    */
   async signOut() {
-    try {
-      await this.afAuth.signOut();
-      await this.router.navigate(['/login'], { replaceUrl: true });
-    } catch (error) {
-      throw error;
-    }
+    await this.afAuth.signOut();
+    await this.router.navigate(['/login'], { replaceUrl: true });
   }
 
   /**
@@ -139,26 +127,21 @@ export class AuthService {
   async updateProfile(profileData: UserProfile) {
     const user = await this.getCurrentUser();
     if (user) {
-      try {
-        await user.updateProfile({
-          displayName: profileData.displayName,
-          photoURL: profileData.photoURL
-        });
+      await user.updateProfile({
+        displayName: profileData.displayName,
+        photoURL: profileData.photoURL
+      });
 
-        await this.firestore.collection('users').doc(user.uid).set({
-          birthDate: profileData.birthDate,
-          phone: profileData.phone,
-          location: profileData.location,
-          bio: profileData.bio,
-          email: user.email,
-          updatedAt: new Date()
-        }, { merge: true });
+      await this.firestore.collection('users').doc(user.uid).set({
+        birthDate: profileData.birthDate,
+        phone: profileData.phone,
+        location: profileData.location,
+        bio: profileData.bio,
+        email: user.email,
+        updatedAt: new Date()
+      }, { merge: true });
 
-        return true;
-      } catch (error) {
-        console.error('Error updating profile:', error);
-        throw error;
-      }
+      return true;
     }
     return false;
   }
@@ -184,13 +167,9 @@ export class AuthService {
   async updateEmail(newEmail: string) {
     const user = await this.getCurrentUser();
     if (user) {
-      try {
-        await user.updateEmail(newEmail);
-        await user.sendEmailVerification();
-        return true;
-      } catch (error) {
-        throw error;
-      }
+      await user.updateEmail(newEmail);
+      await user.sendEmailVerification();
+      return true;
     }
     return false;
   }
@@ -203,12 +182,8 @@ export class AuthService {
   async updatePassword(newPassword: string) {
     const user = await this.getCurrentUser();
     if (user) {
-      try {
-        await user.updatePassword(newPassword);
-        return true;
-      } catch (error) {
-        throw error;
-      }
+      await user.updatePassword(newPassword);
+      return true;
     }
     return false;
   }
@@ -220,12 +195,8 @@ export class AuthService {
   async sendEmailVerification() {
     const user = await this.getCurrentUser();
     if (user) {
-      try {
-        await user.sendEmailVerification();
-        return true;
-      } catch (error) {
-        throw error;
-      }
+      await user.sendEmailVerification();
+      return true;
     }
     return false;
   }
@@ -238,30 +209,49 @@ export class AuthService {
   async reauthenticate(password: string) {
     const user = await this.getCurrentUser();
     if (user && user.email) {
-      try {
-        return await this.afAuth.signInWithEmailAndPassword(user.email, password);
-      } catch (error) {
-        throw error;
-      }
+      return await this.afAuth.signInWithEmailAndPassword(user.email, password);
     }
     return null;
+  }
+
+  async checkEmailExists(email: string): Promise<boolean> {
+    const methods = await this.afAuth.fetchSignInMethodsForEmail(email);
+    return methods && methods.length > 0;
   }
 
   /**
    * Vincula la cuenta de Twitter al usuario actual
    * @returns {Promise<boolean>} Promesa que indica si la vinculación fue exitosa
    */
-  async linkTwitter() {
+  async linkTwitterAccount(): Promise<any> {
     try {
       const provider = new firebase.auth.TwitterAuthProvider();
-      const currentUser = await this.getCurrentUser();
-      if (currentUser) {
-        await currentUser.linkWithPopup(provider);
-        return true;
+      const user = await this.afAuth.currentUser;
+      
+      if (!user) {
+        throw new Error('No user logged in');
       }
-      return false;
-    } catch (error) {
-      console.error('Error linking Twitter:', error);
+  
+      const result = await user.linkWithPopup(provider);
+      
+      if (result.user) {
+        await this.firestore.collection('users').doc(user.uid).update({
+          twitterLinked: true,
+          twitterUsername: result.user.displayName || null,
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+  
+      return result;
+    } catch (error: any) {
+      
+      if (error.code === 'auth/credential-already-in-use') {
+        throw new Error('Esta cuenta de Twitter ya está vinculada a otro usuario');
+      } else if (error.code === 'auth/popup-blocked') {
+        throw new Error('El popup fue bloqueado. Por favor, permite ventanas emergentes');
+      } else if (error.code === 'auth/invalid-credential') {
+        throw new Error('Por favor, inicia sesión en Twitter cuando se abra la ventana');
+      }
       throw error;
     }
   }
@@ -270,30 +260,28 @@ export class AuthService {
    * Desvincula la cuenta de Twitter del usuario actual
    * @returns {Promise<boolean>} Promesa que indica si la desvinculación fue exitosa
    */
-  async unlinkTwitter() {
-    try {
-      const currentUser = await this.getCurrentUser();
-      if (currentUser) {
-        await currentUser.unlink('twitter.com');
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error unlinking Twitter:', error);
-      throw error;
+  async unlinkTwitterAccount() {
+    const user = await this.afAuth.currentUser;
+    if (user) {
+      await user.unlink('twitter.com');
+      // Actualizar el estado en Firestore
+      await this.firestore.collection('users').doc(user.uid).update({
+        twitterLinked: false
+      });
+      return true;
     }
+    return false;
   }
 
   /**
    * Verifica si el usuario tiene vinculada una cuenta de Twitter
    * @returns {boolean} True si el usuario tiene vinculada una cuenta de Twitter
    */
-  isTwitterLinked(): boolean {
-    const currentUser = firebase.auth().currentUser;
-    if (currentUser && currentUser.providerData) {
-      return currentUser.providerData.some(
-        provider => provider?.providerId === 'twitter.com'
-      );
+  async isTwitterLinked(): Promise<boolean> {
+    const user = await this.afAuth.currentUser;
+    if (user) {
+      const providers = user.providerData;
+      return providers.some(provider => provider?.providerId === 'twitter.com');
     }
     return false;
   }

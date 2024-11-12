@@ -17,6 +17,28 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 16px;
 
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+
+    .user-email {
+      ion-label {
+        font-size: 18px;
+        font-weight: 500;
+        color: #ffffff;
+      }
+    }
+
+    .user-since {
+      ion-label {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+    }
+  }
+
   .profile-avatar {
     position: relative;
     cursor: pointer;
@@ -34,6 +56,20 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+      }
+
+      ion-item-divider {
+        --background: rgba(255, 255, 255, 0.1);
+        --color: #ffffff;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        min-height: 40px;
+        padding: 8px 16px;
+    
+        ion-label {
+          margin: 0;
+        }
       }
     }
   
@@ -59,6 +95,20 @@
     &:hover .change-photo-overlay {
       opacity: 1;
     }
+  }
+}
+
+.ion-label-info {
+  .label-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 4px;
+  }
+
+  .label-subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
   }
 }
 

@@ -97,12 +97,8 @@ export class Tab3Page implements OnInit {
    * Obtiene las listas de monedas y criptomonedas, y carga los favoritos
    */
   async ngOnInit() {
-    try {
-      await Promise.all([this.consumirApi(), this.consumirApiCrypto()]);
-      this.cargarFavoritos();
-    } catch (error) {
-      console.error('Error al inicializar:', error);
-    }
+    await Promise.all([this.consumirApi(), this.consumirApiCrypto()]);
+    this.cargarFavoritos();
   }
 
   /**
@@ -117,13 +113,9 @@ export class Tab3Page implements OnInit {
    * Obtiene la lista de monedas desde la API
    */
   async consumirApi() {
-    try {
-      const response = await this.apiService.obtenerApi().toPromise();
-      if (response?.data) {
-        this.monedas = this.ordenarAlfabeticamente(response.data);
-      }
-    } catch (error) {
-      console.error('Error al obtener monedas:', error);
+    const response = await this.apiService.obtenerApi().toPromise();
+    if (response?.data) {
+      this.monedas = this.ordenarAlfabeticamente(response.data);
     }
   }
 
@@ -131,13 +123,9 @@ export class Tab3Page implements OnInit {
    * Obtiene la lista de criptomonedas desde la API
    */
   async consumirApiCrypto() {
-    try {
-      const response = await this.apiService.obtenerApiCrypto().toPromise();
-      if (response?.data) {
-        this.cryptos = this.ordenarAlfabeticamente(response.data);
-      }
-    } catch (error) {
-      console.error('Error al obtener cryptos:', error);
+    const response = await this.apiService.obtenerApiCrypto().toPromise();
+    if (response?.data) {
+      this.cryptos = this.ordenarAlfabeticamente(response.data);
     }
   }
 
@@ -265,7 +253,6 @@ export class Tab3Page implements OnInit {
       const toId = this.toCurrency.id || this.toCurrency.code;
 
       if (!fromId || !toId) {
-        console.error('IDs de moneda no válidos');
         return;
       }
 
@@ -276,11 +263,9 @@ export class Tab3Page implements OnInit {
         const conversion = parsedAmount * parseFloat(response.data.amount);
         this.conversionResult = parseFloat(conversion.toFixed(3));
       } else {
-        console.error('Respuesta de conversión inválida:', response);
         this.conversionResult >= 0.0;
       }
     } catch (error) {
-      console.error('Error en la conversión:', error);
       this.conversionResult = 0;
     }
   }
@@ -377,7 +362,6 @@ export class Tab3Page implements OnInit {
       !this.amount ||
       !this.conversionResult
     ) {
-      console.error('Faltan datos para generar el PDF');
       return;
     }
 
@@ -398,14 +382,13 @@ export class Tab3Page implements OnInit {
   async descargarPdf(
     fromCurrency: { name: string; id?: string; code: string },
     toCurrency: { name: string; id?: string; code: string },
-    amount: number,
+    amount: number, 
     conversionResult: number
   ) {
     if (!fromCurrency || !toCurrency || !amount || !conversionResult) {
-      console.error('Faltan datos para generar el PDF');
       return;
     }
-
+  
     // Crear el PDF
     const pdfBase64 = await this.createPdf(
       fromCurrency,
@@ -413,30 +396,34 @@ export class Tab3Page implements OnInit {
       amount,
       conversionResult
     );
-
-    // Guardar y compartir el PDF
-    if (this.isMobile()) {
-      const writeResult = await Filesystem.writeFile({
-        path: 'comprobanteConversion.pdf',
-        data: pdfBase64,
-        directory: Directory.Documents,
-      });
-
-      // Abre el archivo en móviles usando Share
-      await Share.share({
-        title: 'Comprobante de conversión',
-        text: 'Aquí tienes tu comprobante de conversión.',
-        url: writeResult.uri,
-        dialogTitle: 'Abrir con...',
-      });
-
-      alert('PDF guardado y abierto en tu dispositivo.');
+  
+    // En dispositivos móviles reales (no navegador)
+    if (isPlatform('hybrid')) {
+      try {
+        const writeResult = await Filesystem.writeFile({
+          path: 'comprobanteConversion.pdf',
+          data: pdfBase64,
+          directory: Directory.Documents,
+        });
+  
+        await Share.share({
+          title: 'Comprobante de conversión',
+          text: 'Aquí tienes tu comprobante de conversión.',
+          url: writeResult.uri,
+          dialogTitle: 'Compartir comprobante',
+        });
+      } catch (error) {
+        console.error('Error al guardar/compartir el PDF:', error);
+        alert('Error al generar el PDF. Por favor intente nuevamente.');
+      }
     } else {
-      // Descargar PDF en computadoras
+      // En navegador (desktop o móvil), realizar descarga directa
       const link = document.createElement('a');
       link.href = `data:application/pdf;base64,${pdfBase64}`;
       link.download = 'comprobanteConversion.pdf';
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     }
   }
 

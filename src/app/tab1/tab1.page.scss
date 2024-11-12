@@ -38,20 +38,24 @@
     display: flex;
     margin-bottom: 20px;
 
-    button {
-      flex: 1;
-      padding: 10px;
-      background: transparent;
-      color: #fff;
-      border: none;
-      border-bottom: 2px solid transparent;
-      cursor: pointer;
-      font-size: 16px;
+    ion-button {
+      --flex: 1;
+      --padding: 10px;
+      --background: transparent;
+      --color: #fff;
+      --border: none;
+      --border-bottom: 2px solid transparent;
+      --cursor: pointer;
+      --font-size: 16px;
 
       &.active {
         border-bottom: 2px solid #ffd000;
       }
     }
+  }
+
+  .list-ionic {
+    background: transparent;
   }
 
   ion-item {

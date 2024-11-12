@@ -10,7 +10,7 @@
  * - Cierre de sesión
  */
 import { Component, OnInit } from '@angular/core';
-import { AlertController, ToastController, ActionSheetController } from '@ionic/angular';
+import { AlertController, ToastController, ActionSheetController, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -38,6 +38,7 @@ export class Tab4Page implements OnInit {
     private alertController: AlertController,
     private toastController: ToastController,
     private actionSheetController: ActionSheetController,
+    private loadingController: LoadingController,
     private router: Router
   ) {}
 
@@ -347,7 +348,7 @@ export class Tab4Page implements OnInit {
    * Verifica si el usuario tiene una cuenta de Twitter vinculada
    */
   async checkTwitterStatus() {
-    this.isTwitterLinked = this.authService.isTwitterLinked();
+    this.isTwitterLinked = await this.authService.isTwitterLinked();
   }
   
   /**
@@ -356,11 +357,17 @@ export class Tab4Page implements OnInit {
    * Si no está vinculada, inicia el proceso de vinculación
    */
   async handleTwitterConnection() {
+    const loading = await this.loadingController.create({
+      message: 'Procesando...',
+      spinner: 'circular'
+    });
+  
     try {
+      await loading.present();
+  
       if (this.isTwitterLinked) {
-        // Mostrar confirmación antes de desvincular
         const alert = await this.alertController.create({
-          header: 'Confirmar',
+          header: 'Desvincular Twitter',
           message: '¿Estás seguro que deseas desvincular tu cuenta de Twitter?',
           buttons: [
             {
@@ -370,38 +377,45 @@ export class Tab4Page implements OnInit {
             {
               text: 'Desvincular',
               handler: async () => {
-                await this.authService.unlinkTwitter();
-                await this.presentToast('Cuenta de Twitter desvinculada correctamente');
-                this.checkTwitterStatus();
+                try {
+                  await this.authService.unlinkTwitterAccount();
+                  this.isTwitterLinked = false;
+                  await this.presentToast('Cuenta de Twitter desvinculada correctamente');
+                  await this.checkTwitterStatus(); // Actualizar estado
+                } catch (error) {
+                  await this.handleTwitterError(error);
+                }
               }
             }
           ]
         });
         await alert.present();
       } else {
-        // Conectar cuenta
-        await this.authService.linkTwitter();
-        await this.presentToast('Cuenta de Twitter conectada correctamente');
-        this.checkTwitterStatus();
+        await this.authService.linkTwitterAccount();
+        await this.checkTwitterStatus(); // Actualizar estado después de vincular
+        await this.presentToast('Cuenta de Twitter vinculada exitosamente');
       }
-    } catch (error: any) {
-      let errorMessage = 'Error al procesar la conexión con Twitter';
-      
-      if (error.code === 'auth/provider-already-linked') {
-        errorMessage = 'Esta cuenta de Twitter ya está vinculada a otro usuario';
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        errorMessage = 'Operación cancelada por el usuario';
-      } else if (error.code === 'auth/popup-blocked') {
-        errorMessage = 'El navegador bloqueó la ventana emergente. Por favor, permite las ventanas emergentes para este sitio.';
-      }
-      
-      const alert = await this.alertController.create({
-        header: 'Error',
-        message: errorMessage,
-        buttons: ['OK']
-      });
-      await alert.present();
+    } catch (error) {
+      await this.handleTwitterError(error);
+    } finally {
+      await loading.dismiss();
     }
+  }
+
+  private async handleTwitterError(error: any) {
+    console.error('Error con Twitter:', error);
+    let message = 'Error al procesar la conexión con Twitter';
+    
+    if (error.code === 'auth/requires-recent-login') {
+      message = 'Por favor, vuelve a iniciar sesión para realizar esta acción';
+      await this.router.navigate(['/login']);
+    } else if (error.code === 'auth/invalid-credential') {
+      message = 'La autenticación con Twitter ha fallado. Por favor, intenta nuevamente';
+    } else if (error.message) {
+      message = error.message;
+    }
+    
+    await this.presentToast(message);
   }
 
   /**

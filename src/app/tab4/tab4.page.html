@@ -4,16 +4,20 @@
     <div class="profile-header">
       <div class="profile-avatar" (click)="changeProfilePicture()">
         <ion-avatar>
-          <img [src]="profileImage" alt="Profile Picture">
+          <ion-img [src]="profileImage" alt="Profile Picture"></ion-img>
         </ion-avatar>
         <div class="change-photo-overlay">
           <ion-icon name="camera"></ion-icon>
         </div>
       </div>
-      <h2>{{ user?.email || 'Usuario' }}</h2>
-      <p class="user-since" *ngIf="user?.metadata?.creationTime">
-        Miembro desde {{ user?.metadata?.creationTime | date:'MMM yyyy' }}
-      </p>
+      <div class="user-info">
+        <ion-text class="user-email">
+          <ion-label>{{ user?.email || 'Usuario' }}</ion-label>
+        </ion-text>
+        <ion-text class="user-since" *ngIf="user?.metadata?.creationTime">
+          <ion-label>Miembro desde {{ user?.metadata?.creationTime | date:'MMM yyyy' }}</ion-label>
+        </ion-text>
+      </div>
     </div>
 
     <!-- Secciones del perfil -->
@@ -26,17 +30,17 @@
 
         <ion-item button detail (click)="editProfile()">
           <ion-icon name="person-outline" slot="start"></ion-icon>
-          <ion-label>
-            <h3>Perfil</h3>
-            <p>{{ user?.displayName || 'Editar información personal' }}</p>
+          <ion-label class="ion-label-info">
+            <div class="label-title">Perfil</div>
+            <div class="label-subtitle">{{ user?.displayName || 'Editar información personal' }}</div>
           </ion-label>
         </ion-item>
-
+        
         <ion-item button detail (click)="editEmail()">
           <ion-icon name="mail-outline" slot="start"></ion-icon>
-          <ion-label>
-            <h3>Email</h3>
-            <p>{{ user?.email }}</p>
+          <ion-label class="ion-label-info">
+            <div class="label-title">Email</div>
+            <div class="label-subtitle">{{ user?.email }}</div>
           </ion-label>
         </ion-item>
       </ion-item-group>

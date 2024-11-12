@@ -1,7 +1,7 @@
 <ion-content>
   <div class="login-container">
     <div class="containerLogo">
-      <img
+      <ion-img
         class="logo"
         src="assets/img/CryptoApp-LogoClaro.png"
         alt="logo CryptoApp"
@@ -9,15 +9,15 @@
     </div>
     <div class="login-box">
       <div class="tabs">
-        <button [ngClass]="{ active: isSignIn }" (click)="toggleSignIn()">
+        <ion-button [ngClass]="{ active: isSignIn }" (click)="toggleSignIn()">
           Ingresar
-        </button>
-        <button [ngClass]="{ active: !isSignIn }" (click)="toggleSignUp()">
+        </ion-button>
+        <ion-button [ngClass]="{ active: !isSignIn }" (click)="toggleSignUp()">
           Registrarse
-        </button>
+        </ion-button>
       </div>
 
-      <form *ngIf="isSignIn">
+      <ion-list class="list-ionic" *ngIf="isSignIn">
         <ion-item>
           <ion-label position="floating">Email</ion-label>
           <ion-input type="email" [(ngModel)]="email" name="email"></ion-input>
@@ -44,12 +44,12 @@
         <ion-button id="btn-sign-in" expand="block" (click)="onSignIn()"
           >Ingresar</ion-button
         >
-        <p class="forgot-password" (click)="goToForgotPassword()">
+        <ion-text class="forgot-password" (click)="goToForgotPassword()">
           ¿Olvidaste tu contraseña?
-        </p>
-      </form>
+        </ion-text>
+      </ion-list>
 
-      <form *ngIf="!isSignIn">
+      <ion-list class="list-ionic" *ngIf="!isSignIn">
         <ion-item>
           <ion-label position="floating">Email</ion-label>
           <ion-input
@@ -80,7 +80,7 @@
         <ion-button id="btn-sign-up" expand="block" (click)="onSignUp()"
           >Registrarse</ion-button
         >
-      </form>
+      </ion-list>
     </div>
   </div>
 </ion-content>

@@ -57,7 +57,7 @@ export class LoginPage {
     private alertController: AlertController,
     private toastController: ToastController,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     // Verificar si hay un email guardado al iniciar
     const savedEmail = localStorage.getItem('rememberedEmail');
@@ -219,13 +219,13 @@ export class LoginPage {
    */
   async onSignUp() {
     // Validar el email (primera prioridad)
-    if (!this.email || this.email.trim() === '') {
+    if (!this.email2 || this.email2.trim() === '') {
       await this.presentAlert('Error', 'Por favor, ingrese su correo electrónico');
       return;
     }
 
     // Validar formato del email
-    if (!this.validateEmail(this.email)) {
+    if (!this.validateEmail(this.email2)) {
       await this.presentAlert('Error', 'Por favor, ingrese un correo electrónico válido');
       return;
     }
@@ -253,9 +253,14 @@ export class LoginPage {
       await this.presentAlert('Error', 'Las contraseñas no coinciden');
       return;
     }
-    
     try {
-      const result = await this.authService.signUp(this.email, this.password2);
+      const emailExists = await this.authService.checkEmailExists(this.email2);
+      if (emailExists) {
+        await this.presentAlert('Error', 'Este correo electrónico ya está registrado');
+        return;
+      }
+
+      const result = await this.authService.signUp(this.email2, this.password2);
       await this.presentAlert('Registro Exitoso', 'Se ha registrado correctamente');
       this.clearFields();
       this.toggleSignIn();
