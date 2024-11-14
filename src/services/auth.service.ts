@@ -131,23 +131,25 @@ export class AuthService {
   async updateProfile(profileData: UserProfile) {
     const user = await this.getCurrentUser();
     if (user) {
+      // Actualizar perfil en Firebase Auth
       await user.updateProfile({
         displayName: profileData.displayName,
         photoURL: profileData.photoURL,
       });
-
-      await this.firestore.collection('users').doc(user.uid).set(
-        {
-          birthDate: profileData.birthDate,
-          phone: profileData.phone,
-          location: profileData.location,
-          bio: profileData.bio,
-          email: user.email,
-          updatedAt: new Date(),
-        },
-        { merge: true }
-      );
-
+  
+      // Actualizar datos en Firestore
+      await this.firestore.collection('users').doc(user.uid).set({
+        displayName: profileData.displayName,
+        photoURL: profileData.photoURL,
+        birthDate: profileData.birthDate,
+        phone: profileData.phone,
+        location: profileData.location,
+        bio: profileData.bio,
+        email: user.email,
+        memberSince: user.metadata.creationTime,
+        updatedAt: new Date(),
+      }, { merge: true });
+  
       return true;
     }
     return false;
@@ -157,7 +159,7 @@ export class AuthService {
    * Obtiene el perfil del usuario desde Firestore
    * @returns {Promise<any | null>} Promesa con los datos del perfil del usuario
    */
-  async getUserProfile() {
+  async getUserProfile(): Promise<UserProfile | null> {
     const user = await this.getCurrentUser();
     if (user) {
       const docSnapshot = await this.firestore
@@ -165,7 +167,7 @@ export class AuthService {
         .doc(user.uid)
         .get()
         .toPromise();
-      return docSnapshot?.data() || null;
+      return (docSnapshot?.data() as UserProfile) || null;
     }
     return null;
   }

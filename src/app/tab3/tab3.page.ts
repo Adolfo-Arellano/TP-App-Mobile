@@ -401,38 +401,32 @@ export class Tab3Page implements OnInit {
       conversionResult
     );
 
-    // En dispositivos móviles reales (no navegador)
-    if (isPlatform('hybrid')) {
-      try {
-        const writeResult = await Filesystem.writeFile({
-          path: 'comprobanteConversion.pdf',
-          data: pdfBase64,
-          directory: Directory.Documents,
-        });
-
-        await Share.share({
-          title: 'Comprobante de conversión',
-          text: 'Aquí tienes tu comprobante de conversión.',
-          url: writeResult.uri,
-          dialogTitle: 'Compartir comprobante',
-        });
-      } catch (error) {
-        console.error('Error al guardar/compartir el PDF:', error);
-        alert('Error al generar el PDF. Por favor intente nuevamente.');
-      }
+    // Guardar y compartir el PDF
+    if (this.isMobile()) {
+      const writeResult = await Filesystem.writeFile({
+        path: 'comprobanteConversion.pdf',
+        data: pdfBase64,
+        directory: Directory.Documents,
+      });
+      // Abre el archivo en móviles usando Share
+      await Share.share({
+        title: 'Comprobante de conversión',
+        text: 'Aquí tienes tu comprobante de conversión.',
+        url: writeResult.uri,
+        dialogTitle: 'Abrir con...',
+      });
+      alert('PDF guardado y abierto en tu dispositivo.');
     } else {
-      // En navegador (desktop o móvil), realizar descarga directa
+      // Descargar PDF en computadoras
       const link = document.createElement('a');
       link.href = `data:application/pdf;base64,${pdfBase64}`;
       link.download = 'comprobanteConversion.pdf';
-      document.body.appendChild(link);
+      // document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      // document.body.removeChild(link);
     }
   }
 
-  // Método para crear el PDF con la información de la conversión de divisas
-  // Método para crear el PDF con la información de la conversión de divisas
   async createPdf(
     fromCurrency: { name: string; id?: string; code: string },
     toCurrency: { name: string; id?: string; code: string },

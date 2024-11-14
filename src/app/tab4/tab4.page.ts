@@ -15,13 +15,25 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
+interface UserProfile {
+  displayName?: string;
+  email?: string;
+  photoURL?: string;
+  birthDate?: string;
+  phone?: string;
+  location?: string;
+  bio?: string;
+  memberSince?: string;
+  emailVerified?: boolean;
+}
+
 @Component({
   selector: 'app-tab4',
   templateUrl: './tab4.page.html',
   styleUrls: ['./tab4.page.scss'],
 })
 export class Tab4Page implements OnInit {
-  user: any = null;
+  user: UserProfile | null = null;
   isTwitterLinked: boolean = false;
   profileImage: string = 'assets/default-avatar.png';
   memberSince: string = '';
@@ -55,30 +67,27 @@ export class Tab4Page implements OnInit {
    * Carga el perfil del usuario y se suscribe a cambios en el estado de autenticación
    */
   loadUserProfile() {
-    this.authService.getAuthState().subscribe(user => {
+    this.authService.getAuthState().subscribe(async user => {
       if (user) {
-        // Información básica del usuario
-        this.user = {
-          email: user.email,
-          memberSince: new Date(user.metadata?.creationTime || Date.now()).toLocaleDateString('es-ES', {
-            month: 'short',
+        const profileData = await this.authService.getUserProfile();
+        
+        // Formatear la fecha de creación
+        if (user.metadata?.creationTime) {
+          this.memberSince = new Date(user.metadata?.creationTime || Date.now()).toLocaleDateString('es-ES', {
+            month: 'long',
             year: 'numeric'
-          })
-        };
-
-        // Cargar datos adicionales del perfil desde SessionStorage
-        const profileData = sessionStorage.getItem('userProfileData');
-        if (profileData) {
-          const parsedData = JSON.parse(profileData);
-          this.user = {
-            ...this.user,
-            ...parsedData
-          };
+          });
         }
-
-        // Cargar imagen del perfil
-        const savedImage = sessionStorage.getItem('userProfileImage');
-        this.profileImage = savedImage || 'assets/default-avatar.png';
+  
+        this.user = {
+          displayName: profileData?.displayName || 'Usuario',
+          email: user.email || '',
+          memberSince: this.memberSince,
+          emailVerified: user.emailVerified,
+          photoURL: profileData?.photoURL
+        };
+  
+        this.profileImage = this.user.photoURL || 'assets/default-avatar.png';
       }
     });
   }
@@ -144,19 +153,23 @@ export class Tab4Page implements OnInit {
           text: 'Guardar',
           handler: async (data) => {
             try {
+              if (!this.user) {
+                throw new Error('No hay usuario');
+              }
+          
               // Mantener el email y memberSince al actualizar
               const updatedData = {
                 ...data,
-                email: this.user.email,
-                memberSince: this.user.memberSince
+                email: this.user.email || '',
+                memberSince: this.user.memberSince || ''
               };
               
-              // Guardar en SessionStorage
-              sessionStorage.setItem('userProfileData', JSON.stringify(updatedData));
+              // Actualizar en Firestore en lugar de SessionStorage
+              await this.authService.updateProfile(updatedData);
               
               // Actualizar estado local
               this.user = updatedData;
-
+          
               await this.presentToast('Perfil actualizado correctamente');
             } catch (error) {
               console.error('Error al actualizar perfil:', error);
@@ -297,8 +310,7 @@ export class Tab4Page implements OnInit {
    */
   async changeProfilePicture() {
     const actionSheet = await this.actionSheetController.create({
-      header: 'Cambiar foto de perfil',
-      cssClass: 'custom-action-sheet',
+      header: 'Seleccionar fuente de imagen',
       buttons: [
         {
           text: 'Tomar foto',
@@ -335,9 +347,14 @@ export class Tab4Page implements OnInit {
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Camera
       });
-
+  
       if (image.dataUrl) {
-        sessionStorage.setItem('userProfileImage', image.dataUrl);
+        // Actualizar en Firestore
+        await this.authService.updateProfile({
+          ...this.user,
+          photoURL: image.dataUrl
+        });
+        
         this.profileImage = image.dataUrl;
         await this.presentToast('Foto actualizada correctamente');
       }
@@ -359,10 +376,20 @@ export class Tab4Page implements OnInit {
       const file = e.target.files[0];
       if (file) {
         try {
-          const url = URL.createObjectURL(file);
-          sessionStorage.setItem('userProfileImage', url);
-          this.profileImage = url;
-          await this.presentToast('Foto actualizada correctamente');
+          const reader = new FileReader();
+          reader.onload = async (event) => {
+            const dataUrl = event.target?.result as string;
+            
+            // Actualizar en Firestore
+            await this.authService.updateProfile({
+              ...this.user,
+              photoURL: dataUrl
+            });
+            
+            this.profileImage = dataUrl;
+            await this.presentToast('Foto actualizada correctamente');
+          };
+          reader.readAsDataURL(file);
         } catch (error) {
           console.error('Error al cargar la imagen:', error);
           await this.presentToast('Error al cargar la imagen');

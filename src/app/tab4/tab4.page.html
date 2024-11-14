@@ -10,14 +10,10 @@
           <ion-icon name="camera"></ion-icon>
         </div>
       </div>
-      <ion-text>
-        <h2>{{ user?.displayName || 'Usuario' }}</h2>
-      </ion-text>
-      <ion-text color="medium" *ngIf="user?.memberSince">
-        <p>Miembro desde {{ user?.memberSince }}</p>
-      </ion-text>
+      <h2>{{ user?.displayName || 'Usuario' }}</h2>
+      <p class="member-since">Miembro desde {{ memberSince }}</p>
     </div>
-
+    
     <!-- Secciones del perfil -->
     <div class="profile-sections">
       <!-- Información Personal -->
@@ -25,22 +21,20 @@
         <ion-item-divider>
           <ion-label>Información Personal</ion-label>
         </ion-item-divider>
-
+      
         <ion-item button detail (click)="editProfile()">
           <ion-icon name="person-outline" slot="start"></ion-icon>
-          <ion-label class="ion-label-info">
-            <div class="label-title">Perfil</div>
-            <div class="label-subtitle">
-              {{ user?.displayName || 'Editar información personal' }}
-            </div>
+          <ion-label>
+            <h3>Perfil</h3>
+            <p>Editar información personal</p>
           </ion-label>
         </ion-item>
-
+      
         <ion-item>
           <ion-icon name="mail-outline" slot="start"></ion-icon>
-          <ion-label class="ion-label-info">
-            <div class="label-title">Email</div>
-            <div class="label-subtitle">{{ user?.email }}</div>
+          <ion-label>
+            <h3>Email</h3>
+            <p>{{ user?.email }}</p>
           </ion-label>
         </ion-item>
       </ion-item-group>
@@ -77,24 +71,6 @@
           </ion-badge>
         </ion-item>
       </ion-item-group>
-
-      <!-- Redes Sociales
-      <ion-item-group>
-        <ion-item-divider>
-          <ion-label>Redes Sociales</ion-label>
-        </ion-item-divider>
-
-        <ion-item (click)="handleTwitterConnection()" button>
-          <ion-icon name="logo-twitter" slot="start"></ion-icon>
-          <ion-label>
-            <h3>Twitter</h3>
-            <p>{{ isTwitterLinked ? 'Conectado' : 'Conectar cuenta' }}</p>
-          </ion-label>
-          <ion-badge slot="end" [color]="isTwitterLinked ? 'success' : 'medium'">
-            {{ isTwitterLinked ? 'Conectado' : 'Desconectado' }}
-          </ion-badge>
-        </ion-item>
-      </ion-item-group> -->
     </div>
 
     <!-- Botón de cerrar sesión -->
