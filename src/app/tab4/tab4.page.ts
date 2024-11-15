@@ -1,6 +1,6 @@
 /**
  * Tab4Page Component (Profile Page)
- * 
+ *
  * Este componente maneja la gestión del perfil de usuario, incluyendo:
  * - Edición de información personal
  * - Gestión de credenciales (email y contraseña)
@@ -10,7 +10,12 @@
  * - Cierre de sesión
  */
 import { Component, OnInit } from '@angular/core';
-import { AlertController, ToastController, ActionSheetController, LoadingController } from '@ionic/angular';
+import {
+  AlertController,
+  ToastController,
+  ActionSheetController,
+  LoadingController,
+} from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -67,26 +72,28 @@ export class Tab4Page implements OnInit {
    * Carga el perfil del usuario y se suscribe a cambios en el estado de autenticación
    */
   loadUserProfile() {
-    this.authService.getAuthState().subscribe(async user => {
+    this.authService.getAuthState().subscribe(async (user) => {
       if (user) {
         const profileData = await this.authService.getUserProfile();
-        
+
         // Formatear la fecha de creación
         if (user.metadata?.creationTime) {
-          this.memberSince = new Date(user.metadata?.creationTime || Date.now()).toLocaleDateString('es-ES', {
+          this.memberSince = new Date(
+            user.metadata?.creationTime || Date.now()
+          ).toLocaleDateString('es-ES', {
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
           });
         }
-  
+
         this.user = {
           displayName: profileData?.displayName || 'Usuario',
           email: user.email || '',
           memberSince: this.memberSince,
           emailVerified: user.emailVerified,
-          photoURL: profileData?.photoURL
+          photoURL: profileData?.photoURL,
         };
-  
+
         this.profileImage = this.user.photoURL || 'assets/default-avatar.png';
       }
     });
@@ -100,7 +107,7 @@ export class Tab4Page implements OnInit {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
-      position: 'top'
+      position: 'top',
     });
     await toast.present();
   }
@@ -117,37 +124,37 @@ export class Tab4Page implements OnInit {
           name: 'displayName',
           type: 'text',
           placeholder: 'Nombre completo',
-          value: this.user?.displayName || ''
+          value: this.user?.displayName || '',
         },
         {
           name: 'birthDate',
           type: 'date',
           placeholder: 'Fecha de nacimiento',
-          value: this.user?.birthDate || ''
+          value: this.user?.birthDate || '',
         },
         {
           name: 'phone',
           type: 'tel',
           placeholder: 'Teléfono',
-          value: this.user?.phone || ''
+          value: this.user?.phone || '',
         },
         {
           name: 'location',
           type: 'text',
           placeholder: 'Ubicación',
-          value: this.user?.location || ''
+          value: this.user?.location || '',
         },
         {
           name: 'bio',
           type: 'textarea',
           placeholder: 'Biografía',
-          value: this.user?.bio || ''
-        }
+          value: this.user?.bio || '',
+        },
       ],
       buttons: [
         {
           text: 'Cancelar',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Guardar',
@@ -156,28 +163,28 @@ export class Tab4Page implements OnInit {
               if (!this.user) {
                 throw new Error('No hay usuario');
               }
-          
+
               // Mantener el email y memberSince al actualizar
               const updatedData = {
                 ...data,
                 email: this.user.email || '',
-                memberSince: this.user.memberSince || ''
+                memberSince: this.user.memberSince || '',
               };
-              
+
               // Actualizar en Firestore en lugar de SessionStorage
               await this.authService.updateProfile(updatedData);
-              
+
               // Actualizar estado local
               this.user = updatedData;
-          
+
               await this.presentToast('Perfil actualizado correctamente');
             } catch (error) {
               console.error('Error al actualizar perfil:', error);
               await this.presentToast('Error al actualizar el perfil');
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   }
@@ -194,18 +201,18 @@ export class Tab4Page implements OnInit {
           name: 'email',
           type: 'email',
           placeholder: 'Nuevo email',
-          value: ''
+          value: '',
         },
         {
           name: 'password',
           type: 'password',
-          placeholder: 'Contraseña actual (para confirmar)'
-        }
+          placeholder: 'Contraseña actual (para confirmar)',
+        },
       ],
       buttons: [
         {
           text: 'Cancelar',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Guardar',
@@ -214,7 +221,9 @@ export class Tab4Page implements OnInit {
               // Primero reautenticar al usuario
               await this.authService.reauthenticate(data.password);
               await this.authService.updateEmail(data.email);
-              await this.presentToast('Email actualizado correctamente. Por favor, verifica tu nuevo email.');
+              await this.presentToast(
+                'Email actualizado correctamente. Por favor, verifica tu nuevo email.'
+              );
             } catch (error: any) {
               console.error('Error al actualizar email:', error);
               let errorMessage = 'Error al actualizar el email';
@@ -225,9 +234,9 @@ export class Tab4Page implements OnInit {
               }
               await this.presentToast(errorMessage);
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   }
@@ -243,23 +252,23 @@ export class Tab4Page implements OnInit {
         {
           name: 'currentPassword',
           type: 'password',
-          placeholder: 'Contraseña actual'
+          placeholder: 'Contraseña actual',
         },
         {
           name: 'newPassword',
           type: 'password',
-          placeholder: 'Nueva contraseña'
+          placeholder: 'Nueva contraseña',
         },
         {
           name: 'confirmPassword',
           type: 'password',
-          placeholder: 'Confirmar nueva contraseña'
-        }
+          placeholder: 'Confirmar nueva contraseña',
+        },
       ],
       buttons: [
         {
           text: 'Cancelar',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Cambiar',
@@ -269,9 +278,11 @@ export class Tab4Page implements OnInit {
                 await this.presentToast('Las contraseñas no coinciden');
                 return;
               }
-              
+
               if (data.newPassword.length < 6) {
-                await this.presentToast('La contraseña debe tener al menos 6 caracteres');
+                await this.presentToast(
+                  'La contraseña debe tener al menos 6 caracteres'
+                );
                 return;
               }
 
@@ -285,21 +296,22 @@ export class Tab4Page implements OnInit {
               }
               await this.presentToast(errorMessage);
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   }
 
-  
   /**
    * Envía un email de verificación al correo del usuario
    */
   async verifyEmail() {
     try {
       await this.authService.sendEmailVerification();
-      await this.presentToast('Se ha enviado un email de verificación a tu correo');
+      await this.presentToast(
+        'Se ha enviado un email de verificación a tu correo'
+      );
     } catch (error) {
       await this.presentToast('Error al enviar el email de verificación');
     }
@@ -317,21 +329,21 @@ export class Tab4Page implements OnInit {
           icon: 'camera',
           handler: () => {
             this.takePicture();
-          }
+          },
         },
         {
           text: 'Seleccionar de galería',
           icon: 'image',
           handler: () => {
             this.uploadPicture();
-          }
+          },
         },
         {
           text: 'Cancelar',
           icon: 'close',
-          role: 'cancel'
-        }
-      ]
+          role: 'cancel',
+        },
+      ],
     });
     await actionSheet.present();
   }
@@ -342,21 +354,32 @@ export class Tab4Page implements OnInit {
   async takePicture() {
     try {
       const image = await Camera.getPhoto({
-        quality: 90,
+        quality: 50, // Calidad reducida para menor tamaño
         allowEditing: true,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Camera
+        resultType: CameraResultType.Base64, // Cambiamos a Base64
+        source: CameraSource.Camera,
+        width: 300, // Reducimos el tamaño
+        height: 300,
       });
-  
-      if (image.dataUrl) {
-        // Actualizar en Firestore
-        await this.authService.updateProfile({
-          ...this.user,
-          photoURL: image.dataUrl
-        });
-        
-        this.profileImage = image.dataUrl;
-        await this.presentToast('Foto actualizada correctamente');
+
+      if (image.base64String) {
+        // Creamos la URL de datos con el base64
+        const imageUrl = `data:image/jpeg;base64,${image.base64String}`;
+
+        try {
+          // Actualizamos el perfil con la nueva imagen
+          await this.authService.updateProfile({
+            ...this.user,
+            photoURL: imageUrl,
+          });
+
+          // Actualizamos la vista
+          this.profileImage = imageUrl;
+          await this.presentToast('Foto actualizada correctamente');
+        } catch (error) {
+          console.error('Error guardando la foto:', error);
+          await this.presentToast('Error al guardar la foto');
+        }
       }
     } catch (error) {
       console.error('Error al tomar la foto:', error);
@@ -368,36 +391,79 @@ export class Tab4Page implements OnInit {
    * Sube una foto desde la galería del dispositivo
    */
   async uploadPicture() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 50,
+        allowEditing: true,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Photos,
+        width: 300,
+        height: 300,
+      });
+
+      if (image.base64String) {
+        const imageUrl = `data:image/jpeg;base64,${image.base64String}`;
+
         try {
-          const reader = new FileReader();
-          reader.onload = async (event) => {
-            const dataUrl = event.target?.result as string;
-            
-            // Actualizar en Firestore
-            await this.authService.updateProfile({
-              ...this.user,
-              photoURL: dataUrl
-            });
-            
-            this.profileImage = dataUrl;
-            await this.presentToast('Foto actualizada correctamente');
-          };
-          reader.readAsDataURL(file);
+          await this.authService.updateProfile({
+            ...this.user,
+            photoURL: imageUrl,
+          });
+
+          this.profileImage = imageUrl;
+          await this.presentToast('Foto actualizada correctamente');
         } catch (error) {
-          console.error('Error al cargar la imagen:', error);
-          await this.presentToast('Error al cargar la imagen');
+          console.error('Error guardando la foto:', error);
+          await this.presentToast('Error al guardar la foto');
         }
       }
-    };
-    
-    input.click();
+    } catch (error) {
+      console.error('Error al seleccionar la foto:', error);
+      await this.presentToast('Error al seleccionar la foto');
+    }
+  }
+
+  /**
+   * Convierte un archivo a Base64
+   */
+  private convertToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxSize = 400; // Tamaño máximo
+          let width = img.width;
+          let height = img.height;
+
+          // Redimensionar manteniendo la proporción
+          if (width > height) {
+            if (width > maxSize) {
+              height *= maxSize / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width *= maxSize / height;
+              height = maxSize;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          // Convertir a base64 con calidad reducida
+          const base64 = canvas.toDataURL('image/jpeg', 0.6);
+          resolve(base64);
+        };
+        img.src = reader.result as string;
+      };
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
   }
 
   /**
@@ -406,7 +472,7 @@ export class Tab4Page implements OnInit {
   async checkTwitterStatus() {
     this.isTwitterLinked = await this.authService.isTwitterLinked();
   }
-  
+
   /**
    * Maneja la vinculación/desvinculación de la cuenta de Twitter
    * Si está vinculada, muestra confirmación para desvincular
@@ -415,12 +481,12 @@ export class Tab4Page implements OnInit {
   async handleTwitterConnection() {
     const loading = await this.loadingController.create({
       message: 'Procesando...',
-      spinner: 'circular'
+      spinner: 'circular',
     });
-  
+
     try {
       await loading.present();
-  
+
       if (this.isTwitterLinked) {
         const alert = await this.alertController.create({
           header: 'Desvincular Twitter',
@@ -428,7 +494,7 @@ export class Tab4Page implements OnInit {
           buttons: [
             {
               text: 'Cancelar',
-              role: 'cancel'
+              role: 'cancel',
             },
             {
               text: 'Desvincular',
@@ -436,14 +502,16 @@ export class Tab4Page implements OnInit {
                 try {
                   await this.authService.unlinkTwitterAccount();
                   this.isTwitterLinked = false;
-                  await this.presentToast('Cuenta de Twitter desvinculada correctamente');
+                  await this.presentToast(
+                    'Cuenta de Twitter desvinculada correctamente'
+                  );
                   await this.checkTwitterStatus(); // Actualizar estado
                 } catch (error) {
                   await this.handleTwitterError(error);
                 }
-              }
-            }
-          ]
+              },
+            },
+          ],
         });
         await alert.present();
       } else {
@@ -461,16 +529,17 @@ export class Tab4Page implements OnInit {
   private async handleTwitterError(error: any) {
     console.error('Error con Twitter:', error);
     let message = 'Error al procesar la conexión con Twitter';
-    
+
     if (error.code === 'auth/requires-recent-login') {
       message = 'Por favor, vuelve a iniciar sesión para realizar esta acción';
       await this.router.navigate(['/login']);
     } else if (error.code === 'auth/invalid-credential') {
-      message = 'La autenticación con Twitter ha fallado. Por favor, intenta nuevamente';
+      message =
+        'La autenticación con Twitter ha fallado. Por favor, intenta nuevamente';
     } else if (error.message) {
       message = error.message;
     }
-    
+
     await this.presentToast(message);
   }
 
@@ -484,7 +553,7 @@ export class Tab4Page implements OnInit {
       buttons: [
         {
           text: 'Cancelar',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Sí, cerrar sesión',
@@ -495,9 +564,9 @@ export class Tab4Page implements OnInit {
               console.error('Error al cerrar sesión:', error);
               await this.presentToast('Error al cerrar sesión');
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   }

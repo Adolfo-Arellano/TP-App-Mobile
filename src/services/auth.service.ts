@@ -128,31 +128,50 @@ export class AuthService {
    * @param {UserProfile} profileData - Datos del perfil a actualizar
    * @returns {Promise<boolean>} Promesa que indica si la actualización fue exitosa
    */
-  async updateProfile(profileData: UserProfile) {
+  async updateProfile(profileData: any) {
     const user = await this.getCurrentUser();
-    if (user) {
-      // Actualizar perfil en Firebase Auth
+    if (!user) throw new Error('No hay usuario autenticado');
+
+    try {
+      // Si hay una nueva foto, verificamos su tamaño
+      if (
+        profileData.photoURL &&
+        profileData.photoURL.startsWith('data:image')
+      ) {
+        const base64Length = profileData.photoURL.split(',')[1].length;
+        const sizeInBytes = (base64Length * 3) / 4;
+        const sizeInMB = sizeInBytes / (1024 * 1024);
+
+        if (sizeInMB > 0.9) {
+          throw new Error(
+            'La imagen es demasiado grande. El tamaño máximo es de 0.9MB'
+          );
+        }
+      }
+
+      // Actualizamos el perfil en Authentication
       await user.updateProfile({
         displayName: profileData.displayName,
         photoURL: profileData.photoURL,
       });
-  
-      // Actualizar datos en Firestore
-      await this.firestore.collection('users').doc(user.uid).set({
-        displayName: profileData.displayName,
-        photoURL: profileData.photoURL,
-        birthDate: profileData.birthDate,
-        phone: profileData.phone,
-        location: profileData.location,
-        bio: profileData.bio,
-        email: user.email,
-        memberSince: user.metadata.creationTime,
-        updatedAt: new Date(),
-      }, { merge: true });
-  
+
+      // Actualizamos en Firestore
+      await this.firestore
+        .collection('users')
+        .doc(user.uid)
+        .set(
+          {
+            ...profileData,
+            updatedAt: new Date(),
+          },
+          { merge: true }
+        );
+
       return true;
+    } catch (error) {
+      console.error('Error en updateProfile:', error);
+      throw error;
     }
-    return false;
   }
 
   /**

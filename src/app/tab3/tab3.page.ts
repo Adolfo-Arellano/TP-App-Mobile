@@ -18,6 +18,8 @@ import { PDFDocument } from 'pdf-lib';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { isPlatform } from '@ionic/angular';
+import { Capacitor } from '@capacitor/core';
+
 (<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 
 interface ConversionResponse {
@@ -382,6 +384,26 @@ export class Tab3Page implements OnInit {
       this.conversionResult
     );
   }
+
+  async checkPermessi() {
+    let permissions = await Filesystem.checkPermissions();
+    let status = false;
+
+    if (permissions.publicStorage == 'granted') {
+      status = true;
+    } else {
+      status = false;
+      await Filesystem.requestPermissions();
+      let permissions2 = await Filesystem.checkPermissions();
+      if (permissions2.publicStorage == 'granted') {
+        status = true;
+      } else {
+        status = false;
+      }
+    }
+
+    return status;
+  }
   // Método para descargar el PDF con la información de la conversión de divisas y compartirlo en móviles
   async descargarPdf(
     fromCurrency: { name: string; id?: string; code: string },
@@ -403,19 +425,28 @@ export class Tab3Page implements OnInit {
 
     // Guardar y compartir el PDF
     if (this.isMobile()) {
-      const writeResult = await Filesystem.writeFile({
-        path: 'comprobanteConversion.pdf',
-        data: pdfBase64,
-        directory: Directory.Documents,
-      });
-      // Abre el archivo en móviles usando Share
-      await Share.share({
-        title: 'Comprobante de conversión',
-        text: 'Aquí tienes tu comprobante de conversión.',
-        url: writeResult.uri,
-        dialogTitle: 'Abrir con...',
-      });
-      alert('PDF guardado y abierto en tu dispositivo.');
+      let permission = await Filesystem.checkPermissions();
+
+      const status = await this.checkPermessi();
+
+      if (status) {
+        const fileName = 'comprobanteConversion.pdf';
+        const filePath = `comprobanteConversion.pdf`;
+        const result = await Filesystem.writeFile({
+          path: filePath,
+          data: pdfBase64,
+          directory: Directory.External,
+        });
+
+        if (result.uri) {
+          await Share.share({
+            title: 'Comprobante de conversión',
+            text: 'Comprobante de conversión de divisas',
+            url: result.uri,
+            dialogTitle: 'Compartir comprobante de conversión',
+          });
+        }
+      }
     } else {
       // Descargar PDF en computadoras
       const link = document.createElement('a');
